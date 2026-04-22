@@ -8,6 +8,13 @@ watch(() => route.fullPath, () => {
   clearHeader()
 })
 
+const isHydrated = ref(false)
+onMounted(() => {
+  isHydrated.value = true
+})
+
+const metaHeader = computed(() => (route.meta.header as any) || {})
+
 // Derive fallback title from route when no explicit title is set
 const fallbackTitle = computed(() => {
   if (route.fullPath === '/')
@@ -23,16 +30,34 @@ const fallbackTitle = computed(() => {
 
 // Resolve title: prefer translation key, then static title, then fallback
 const displayTitle = computed(() => {
-  if (headerState.titleKey)
-    return t(headerState.titleKey)
-  return headerState.title || fallbackTitle.value
+  if (metaHeader.value.titleKey) return t(metaHeader.value.titleKey)
+  if (metaHeader.value.title) return metaHeader.value.title
+  
+  if (isHydrated.value) {
+    if (headerState.value.titleKey) return t(headerState.value.titleKey)
+    if (headerState.value.title) return headerState.value.title
+  }
+  
+  return fallbackTitle.value
 })
 
 // Resolve description: prefer translation key, then static description
 const displayDescription = computed(() => {
-  if (headerState.descriptionKey)
-    return t(headerState.descriptionKey)
-  return headerState.description || ''
+  if (metaHeader.value.descriptionKey) return t(metaHeader.value.descriptionKey)
+  if (metaHeader.value.description) return metaHeader.value.description
+
+  if (isHydrated.value) {
+    if (headerState.value.descriptionKey) return t(headerState.value.descriptionKey)
+    if (headerState.value.description) return headerState.value.description
+  }
+
+  return ''
+})
+
+const displayIcon = computed(() => {
+  if (metaHeader.value.icon) return metaHeader.value.icon
+  if (isHydrated.value && headerState.value.icon) return headerState.value.icon
+  return ''
 })
 </script>
 
@@ -42,7 +67,7 @@ const displayDescription = computed(() => {
       <SidebarTrigger />
       <Separator orientation="vertical" class="h-4" />
       <div class="flex items-center gap-2.5 min-w-0">
-        <Icon v-if="headerState.icon" :name="headerState.icon" class="size-5 shrink-0 text-primary" />
+        <Icon v-if="displayIcon" :name="displayIcon" class="size-5 shrink-0 text-primary" />
         <div class="min-w-0">
           <div class="flex items-center gap-1.5">
             <h1 class="text-sm font-semibold leading-tight truncate">

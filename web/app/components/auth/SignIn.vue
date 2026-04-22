@@ -2,8 +2,8 @@
 import { Loader2 } from 'lucide-vue-next'
 import PasswordInput from '~/components/PasswordInput.vue'
 
-const email = ref('super@test.com')
-const password = ref('password123')
+const email = ref('admin@aivisualpro.com')
+const password = ref('Abc123***')
 const isLoading = ref(false)
 
 const supabase = useSupabaseClient()

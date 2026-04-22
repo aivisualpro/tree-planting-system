@@ -236,4 +236,13 @@ export default {
   'common.page': 'Page',
   'common.selected': 'selected',
   'common.selectAll': 'Select all',
+  // Tree Planting System Nav
+  'nav.operations': 'Operations',
+  'nav.visits': 'Field Visits',
+  'nav.masters': 'Master Data',
+  'nav.countries': 'Countries',
+  'nav.translations': 'Translations',
+  'nav.administration': 'Administration',
+  'nav.users': 'Users & Roles',
+  'nav.auditLog': 'Audit Log',
 } as const

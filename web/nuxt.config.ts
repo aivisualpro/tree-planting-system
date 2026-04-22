@@ -4,13 +4,42 @@ export default defineNuxtConfig({
   devtools: { enabled: false },
   spaLoadingTemplate: false,
 
+  build: {
+    transpile: [
+      '@supabase/supabase-js',
+      '@supabase/ssr',
+      '@supabase/auth-js',
+      '@supabase/storage-js',
+      '@supabase/realtime-js',
+      '@supabase/functions-js',
+    ],
+  },
+
   watch: ['~/app.config.ts'],
 
   css: ['~/assets/css/tailwind.css'],
   vite: {
+    logLevel: 'error',
     plugins: [
       tailwindcss(),
     ],
+    optimizeDeps: {
+      include: ['cookie', '@supabase/ssr'],
+      exclude: ['@supabase/postgrest-js']
+    },
+    resolve: {
+      alias: {
+        cookie: 'cookie-es'
+      }
+    },
+    build: {
+      rollupOptions: {
+        onwarn(warning, warn) {
+          if (warning.message.includes('"PostgrestError"') || warning.message.includes('@supabase')) return
+          warn(warning)
+        }
+      }
+    },
     server: {
       watch: {
         usePolling: true,
@@ -22,6 +51,23 @@ export default defineNuxtConfig({
       },
     },
   },
+
+  hooks: {
+    'nitro:build:before'(nitro) {
+      nitro.options.rollupConfig = nitro.options.rollupConfig || ({} as any)
+      const originalOnWarn = nitro.options.rollupConfig!.onwarn
+      nitro.options.rollupConfig!.onwarn = (warning, warn) => {
+        if (warning.message.includes('"PostgrestError"')) return
+        if (warning.code === 'CIRCULAR_DEPENDENCY') return
+        if (originalOnWarn) {
+          originalOnWarn(warning, warn)
+        } else {
+          warn(warning)
+        }
+      }
+    }
+  },
+
 
   components: [
     {
@@ -49,7 +95,6 @@ export default defineNuxtConfig({
       callback: '/confirm',
       exclude: ['/register', '/forgot-password', '/otp'],
     },
-    types: '../shared/types/database.ts'
   },
 
   i18n: {
