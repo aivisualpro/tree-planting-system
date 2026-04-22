@@ -1,59 +1,45 @@
 <script setup lang="ts">
-import { use } from 'echarts/core'
-import { LineChart } from 'echarts/charts'
-import {
-  TitleComponent,
-  TooltipComponent,
-  GridComponent,
-  LegendComponent,
-} from 'echarts/components'
-import { CanvasRenderer } from 'echarts/renderers'
+import { ref } from 'vue'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import VChart from 'vue-echarts'
+import { use } from 'echarts/core'
+import { CanvasRenderer } from 'echarts/renderers'
+import { LineChart } from 'echarts/charts'
+import { GridComponent, TooltipComponent, LegendComponent } from 'echarts/components'
 
-use([
-  TitleComponent,
-  TooltipComponent,
-  GridComponent,
-  LegendComponent,
-  LineChart,
-  CanvasRenderer,
-])
+use([CanvasRenderer, LineChart, GridComponent, TooltipComponent, LegendComponent])
 
-const { data: timeline } = await useFetch('/api/dashboard/timeline')
+const props = defineProps<{
+  data: any[]
+}>()
 
-const option = computed(() => {
-  const dates = timeline.value?.map(item => item.date) || []
-  const trees = timeline.value?.map(item => item.trees) || []
-  const attendance = timeline.value?.map(item => item.attendance) || []
-
-  return {
-    tooltip: { trigger: 'axis' },
-    legend: { data: ['Trees Planted', 'Attendance'] },
-    grid: { left: '3%', right: '4%', bottom: '3%', containLabel: true },
-    xAxis: { type: 'category', boundaryGap: false, data: dates },
-    yAxis: { type: 'value' },
-    series: [
-      {
-        name: 'Trees Planted',
-        type: 'line',
-        smooth: true,
-        data: trees,
-        itemStyle: { color: '#16a34a' } // green
-      },
-      {
-        name: 'Attendance',
-        type: 'line',
-        smooth: true,
-        data: attendance,
-        itemStyle: { color: '#2563eb' } // blue
-      }
-    ]
-  }
-})
+const option = computed(() => ({
+  tooltip: { trigger: 'axis' },
+  xAxis: { 
+    type: 'category', 
+    data: props.data ? props.data.map((d: any) => d.date) : [] 
+  },
+  yAxis: { type: 'value' },
+  series: [
+    {
+      data: props.data ? props.data.map((d: any) => d.trees) : [],
+      type: 'line',
+      smooth: true,
+      itemStyle: { color: '#16a34a' }
+    }
+  ]
+}))
 </script>
 
 <template>
-  <div class="h-[400px] w-full">
-    <VChart :option="option" autoresize class="h-full w-full" />
-  </div>
+  <Card class="col-span-4">
+    <CardHeader>
+      <CardTitle>Planting Timeline</CardTitle>
+    </CardHeader>
+    <CardContent>
+      <div class="h-[350px]">
+        <VChart class="w-full h-full" :option="option" autoresize />
+      </div>
+    </CardContent>
+  </Card>
 </template>

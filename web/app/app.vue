@@ -28,9 +28,8 @@ useHead({
     { key: 'theme-color', name: 'theme-color', content: color },
   ],
   link: [
-    { rel: 'icon', type: 'image/svg+xml', href: '/favicon.svg' },
-    { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' },
-    { rel: 'apple-touch-icon', sizes: '180x180', href: '/logo-180.png' },
+    { rel: 'icon', type: 'image/png', href: '/logo.png' },
+    { rel: 'apple-touch-icon', sizes: '180x180', href: '/logo.png' },
     { rel: 'manifest', href: '/manifest.json' },
   ],
   htmlAttrs: {
