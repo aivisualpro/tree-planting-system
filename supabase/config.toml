@@ -2,8 +2,6 @@
 # Generated manually — run `supabase init` to regenerate with latest defaults
 # Docs: https://supabase.com/docs/guides/cli/config
 
-[project]
-id = "tree-planting"
 
 [api]
 enabled = true

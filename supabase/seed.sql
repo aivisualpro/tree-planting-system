@@ -1,11 +1,42 @@
--- ============================================================
--- Seed Data for Local Development
--- ============================================================
--- This file runs automatically after all migrations when you
--- execute `supabase db reset`. Add development/test data here.
---
--- Guidelines:
---   • Use INSERT ... ON CONFLICT DO NOTHING for idempotency
---   • Never put production secrets or real PII here
---   • Keep seed data minimal but representative
--- ============================================================
+INSERT INTO auth.users (id, instance_id, aud, role, email) VALUES
+('11111111-1111-1111-1111-111111111111', '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'super@test.com'),
+('22222222-2222-2222-2222-222222222222', '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'admin_tz@test.com'),
+('33333333-3333-3333-3333-333333333333', '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'coord_mw@test.com'),
+('44444444-4444-4444-4444-444444444444', '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'field_tz@test.com'),
+('55555555-5555-5555-5555-555555555555', '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'field_mw@test.com')
+ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO countries (id, code, name_en) VALUES 
+('c0000000-0000-0000-0000-000000000001', 'TZ', 'Tanzania'),
+('c0000000-0000-0000-0000-000000000002', 'MW', 'Malawi')
+ON CONFLICT (id) DO NOTHING;
+
+UPDATE profiles SET role = 'super_admin' WHERE id = '11111111-1111-1111-1111-111111111111';
+UPDATE profiles SET role = 'admin', assigned_countries = ARRAY['c0000000-0000-0000-0000-000000000001'::uuid] WHERE id = '22222222-2222-2222-2222-222222222222';
+UPDATE profiles SET role = 'coordinator', assigned_countries = ARRAY['c0000000-0000-0000-0000-000000000002'::uuid] WHERE id = '33333333-3333-3333-3333-333333333333';
+UPDATE profiles SET role = 'field_user' WHERE id IN ('44444444-4444-4444-4444-444444444444', '55555555-5555-5555-5555-555555555555');
+
+INSERT INTO core_areas (id, code, name_en) VALUES 
+('ca000000-0000-0000-0000-000000000001', 'AGRO', 'Agroforestry'),
+('ca000000-0000-0000-0000-000000000002', 'REFOR', 'Reforestation'),
+('ca000000-0000-0000-0000-000000000003', 'CONS', 'Conservation')
+ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO activities (id, core_area_id, name_en) VALUES 
+('ac000000-0000-0000-0000-000000000001', 'ca000000-0000-0000-0000-000000000001', 'Tree Planting'),
+('ac000000-0000-0000-0000-000000000002', 'ca000000-0000-0000-0000-000000000001', 'Site Survey')
+ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO tree_species (id, scientific_name, common_name_en) VALUES 
+('f5000000-0000-0000-0000-000000000001', 'Mangifera indica', 'Mango'),
+('f5000000-0000-0000-0000-000000000002', 'Persea americana', 'Avocado')
+ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO visits (id, client_uuid, country_id, core_area_id, activity_id, status, created_by) VALUES
+('ee000000-0000-0000-0000-000000000001', 'ee000000-0000-0000-0000-000000000001', 'c0000000-0000-0000-0000-000000000001', 'ca000000-0000-0000-0000-000000000001', 'ac000000-0000-0000-0000-000000000001', 'completed', '44444444-4444-4444-4444-444444444444')
+ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO visit_trees (visit_id, tree_species_id, count) VALUES
+('ee000000-0000-0000-0000-000000000001', 'f5000000-0000-0000-0000-000000000001', 50),
+('ee000000-0000-0000-0000-000000000001', 'f5000000-0000-0000-0000-000000000002', 20)
+ON CONFLICT (id) DO NOTHING;

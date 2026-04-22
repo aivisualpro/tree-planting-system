@@ -2,23 +2,32 @@
 import { Loader2 } from 'lucide-vue-next'
 import PasswordInput from '~/components/PasswordInput.vue'
 
-const email = ref('demo@gmail.com')
-const password = ref('password')
+const email = ref('super@test.com')
+const password = ref('password123')
 const isLoading = ref(false)
 
-function onSubmit(event: Event) {
+const supabase = useSupabaseClient()
+
+async function onSubmit(event: Event) {
   event.preventDefault()
   if (!email.value || !password.value)
     return
 
   isLoading.value = true
 
-  setTimeout(() => {
-    if (email.value === 'demo@gmail.com' && password.value === 'password')
-      navigateTo('/')
+  const { error } = await supabase.auth.signInWithPassword({
+    email: email.value,
+    password: password.value,
+  })
 
-    isLoading.value = false
-  }, 3000)
+  isLoading.value = false
+
+  if (error) {
+    console.error('Login error:', error.message)
+    alert(error.message)
+  } else {
+    navigateTo('/')
+  }
 }
 </script>
 

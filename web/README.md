@@ -403,13 +403,13 @@ This boilerplate is designed to be **industry-agnostic** and can be adapted for:
 
 ## 📄 License
 
-This project is proprietary software owned by **AI Visual Pro**. All rights reserved.
+This project is proprietary software owned by **Plant With Purpose**. All rights reserved.
 
 ---
 
 <div align="center">
 
-**Built with ❤️ by [Adeel Jabbar](https://aivisualpro.com)**
+**Built with ❤️ by [Plant With Purpose](https://plantwithpurpose.org)**
 
 </div>
 ]]>

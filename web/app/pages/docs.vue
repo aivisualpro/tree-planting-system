@@ -509,10 +509,10 @@ const industries = [
               <Icon name="i-lucide-code-2" class="size-12 text-primary" />
             </div>
             <p class="text-lg font-bold">
-              AI Visual Pro
+              Plant With Purpose
             </p>
             <p class="text-sm text-muted-foreground">
-              Building the future of business software
+              Building the future of Tree Planting System
             </p>
           </div>
         </div>
@@ -522,7 +522,7 @@ const industries = [
     <!-- Footer -->
     <div class="text-center py-4 border-t">
       <p class="text-sm text-muted-foreground">
-        Built with ❤️ by <strong>Adeel Jabbar</strong> · <strong class="text-primary">AI Visual Pro</strong>
+        Built with ❤️ by <strong>Adeel Jabbar</strong> · <strong class="text-primary">Plant With Purpose</strong>
       </p>
     </div>
   </div>

@@ -10,18 +10,19 @@ defineProps<{
     :class="{ 'flex-row-reverse': reverse }"
   >
     <div class="relative hidden h-full flex-1 flex-col bg-muted p-10 text-white lg:flex dark:border-r">
-      <div class="absolute inset-0 bg-zinc-900" />
+      <div class="absolute inset-0 bg-zinc-900 flex flex-col items-center justify-center p-8">
+        <img src="/logo.gif" alt="Tree Planting System Animation" class="max-w-md w-full h-auto object-contain drop-shadow-2xl mb-8" />
+      </div>
       <div class="relative z-20 flex items-center text-lg font-medium gap-2">
-        <img src="/logo-192.png" alt="AI Visual Pro" class="size-7 rounded-md" />
-        AI Visual Pro
+        Tree Planting System
       </div>
       <div class="relative z-20 mt-auto">
         <blockquote class="space-y-2">
           <p class="text-lg">
-            &ldquo;AI Visual Pro has transformed how we manage our entire business — from CRM to inventory to finance, all in one beautiful platform.&rdquo;
+            &ldquo;Empowering communities through sustainable agroforestry. Every tree planted is a step towards a greener future.&rdquo;
           </p>
-          <footer class="text-sm">
-            Adeel Jabbar, Founder
+          <footer class="text-sm text-zinc-300">
+            Global Reforestation Initiative
           </footer>
         </blockquote>
       </div>

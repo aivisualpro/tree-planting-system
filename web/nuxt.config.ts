@@ -17,6 +17,9 @@ export default defineNuxtConfig({
         interval: 1000,
         ignored: ['**/node_modules/**', '**/.git/**'],
       },
+      fs: {
+        allow: ['..']
+      },
     },
   },
 
@@ -35,7 +38,30 @@ export default defineNuxtConfig({
     '@pinia/nuxt',
     '@nuxtjs/color-mode',
     '@nuxt/fonts',
+    '@nuxtjs/supabase',
+    '@nuxtjs/i18n',
   ],
+
+  supabase: {
+    redirect: true,
+    redirectOptions: {
+      login: '/login',
+      callback: '/confirm',
+      exclude: ['/register', '/forgot-password', '/otp'],
+    },
+    types: '../shared/types/database.ts'
+  },
+
+  i18n: {
+    strategy: 'no_prefix',
+    defaultLocale: 'en',
+    langDir: '../../shared/i18n/',
+    locales: [
+      { code: 'en', file: 'en.json' },
+      { code: 'es', file: 'es.json' },
+      { code: 'sw', file: 'sw.json' }
+    ]
+  },
 
   shadcn: {
     /**

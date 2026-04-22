@@ -1,0 +1,18 @@
+BEGIN;
+SELECT plan(1);
+INSERT INTO core_areas (id, code, name_en) VALUES ('00000000-0000-0000-0000-000000000600', 'CA3', 'Core 3');
+INSERT INTO activities (id, core_area_id, name_en) VALUES ('00000000-0000-0000-0000-000000000601', '00000000-0000-0000-0000-000000000600', 'Act 3');
+INSERT INTO countries (id, code, name_en) VALUES ('00000000-0000-0000-0000-000000000602', 'XX', 'XX');
+
+INSERT INTO visits (id, client_uuid, country_id, core_area_id, activity_id) VALUES 
+('00000000-0000-0000-0000-000000000603', '00000000-0000-0000-0000-000000000604', '00000000-0000-0000-0000-000000000602', '00000000-0000-0000-0000-000000000600', '00000000-0000-0000-0000-000000000601');
+
+SELECT throws_ok(
+  'INSERT INTO visits (id, client_uuid, country_id, core_area_id, activity_id) VALUES (''00000000-0000-0000-0000-000000000605'', ''00000000-0000-0000-0000-000000000604'', ''00000000-0000-0000-0000-000000000602'', ''00000000-0000-0000-0000-000000000600'', ''00000000-0000-0000-0000-000000000601'')',
+  '23505',
+  'duplicate key value violates unique constraint "visits_client_uuid_key"',
+  'Idempotency test via unique client_uuid'
+);
+
+SELECT * FROM finish();
+ROLLBACK;

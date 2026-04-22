@@ -22,19 +22,19 @@ const teams: {
   plan: string
 }[] = [
   {
-    name: 'AI Visual Pro',
+    name: 'Plant With Purpose',
     logo: 'i-lucide-gallery-vertical-end',
-    plan: 'Enterprise',
+    plan: 'Free',
   },
   {
-    name: 'Full Stack CRM',
+    name: 'Plant With Purpose',
     logo: 'i-lucide-audio-waveform',
     plan: 'Professional',
   },
   {
-    name: 'Demo Workspace',
+    name: 'Plant With Purpose',
     logo: 'i-lucide-command',
-    plan: 'Free',
+    plan: 'Organization',
   },
 ]
 
