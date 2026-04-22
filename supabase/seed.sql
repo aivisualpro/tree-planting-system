@@ -1,0 +1,11 @@
+-- ============================================================
+-- Seed Data for Local Development
+-- ============================================================
+-- This file runs automatically after all migrations when you
+-- execute `supabase db reset`. Add development/test data here.
+--
+-- Guidelines:
+--   • Use INSERT ... ON CONFLICT DO NOTHING for idempotency
+--   • Never put production secrets or real PII here
+--   • Keep seed data minimal but representative
+-- ============================================================
