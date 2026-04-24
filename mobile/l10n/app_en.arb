@@ -1,0 +1,17 @@
+{
+  "@@locale": "en",
+  "appTitle": "Tree Planting",
+  "loginTitle": "Welcome Back",
+  "email": "Email",
+  "password": "Password",
+  "login": "Login",
+  "syncStatusSynced": "Synced",
+  "syncStatusPending": "Pending Sync",
+  "syncStatusOffline": "Offline",
+  "homeQuickActions": "Quick Actions",
+  "homeNewVisit": "New Visit",
+  "homeViewVisits": "View Visits",
+  "homeDrafts": "Drafts",
+  "homeSyncNow": "Sync Now",
+  "settingsLanguage": "Language"
+}

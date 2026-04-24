@@ -1,0 +1,17 @@
+{
+  "@@locale": "es",
+  "appTitle": "Plantación de Árboles",
+  "loginTitle": "Bienvenido",
+  "email": "Correo electrónico",
+  "password": "Contraseña",
+  "login": "Iniciar sesión",
+  "syncStatusSynced": "Sincronizado",
+  "syncStatusPending": "Sincronización pendiente",
+  "syncStatusOffline": "Desconectado",
+  "homeQuickActions": "Acciones Rápidas",
+  "homeNewVisit": "Nueva Visita",
+  "homeViewVisits": "Ver Visitas",
+  "homeDrafts": "Borradores",
+  "homeSyncNow": "Sincronizar",
+  "settingsLanguage": "Idioma"
+}
