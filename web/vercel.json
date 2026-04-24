@@ -2,9 +2,59 @@
   "framework": "nuxtjs",
   "buildCommand": "pnpm build",
   "outputDirectory": ".output/public",
-  "regions": ["iad1", "cdg1"],
+  "regions": ["iad1", "cdg1", "sin1"],
   "github": {
     "enabled": true,
     "silent": true
-  }
+  },
+  "functions": {
+    "api/dashboard/kpis.get": {
+      "memory": 1024,
+      "maxDuration": 30
+    },
+    "api/dashboard/timeline.get": {
+      "memory": 512,
+      "maxDuration": 30
+    },
+    "api/dashboard/country-breakdown.get": {
+      "memory": 512,
+      "maxDuration": 30
+    },
+    "api/visits/**": {
+      "memory": 256,
+      "maxDuration": 15
+    },
+    "api/exports/**": {
+      "memory": 1024,
+      "maxDuration": 60
+    },
+    "api/reports/**": {
+      "memory": 1024,
+      "maxDuration": 60
+    },
+    "api/health.get": {
+      "memory": 128,
+      "maxDuration": 5
+    }
+  },
+  "headers": [
+    {
+      "source": "/_nuxt/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/fonts/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    }
+  ]
 }

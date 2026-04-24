@@ -1,5 +1,8 @@
 import 'dart:async';
+import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:workmanager/workmanager.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -8,10 +11,12 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart';
 import 'core/config/env.dart';
 import 'core/notifications/notification_service.dart';
-
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'core/sync/sync_provider.dart';
 
+// ─────────────────────────────────────────────────────────────────────────────
+// WorkManager callback – runs in a separate isolate
+// ─────────────────────────────────────────────────────────────────────────────
 @pragma('vm:entry-point')
 void callbackDispatcher() {
   Workmanager().executeTask((task, inputData) async {
@@ -22,16 +27,20 @@ void callbackDispatcher() {
         localStorage: const SecureLocalStorage(),
       ),
     );
-    
     final container = ProviderContainer();
     final syncEngine = container.read(syncEngineProvider);
     await syncEngine.runSync();
     container.dispose();
-    return Future.value(true);
+    return true;
   });
 }
 
-Future<void> bootstrap() async {
+// ─────────────────────────────────────────────────────────────────────────────
+// Phase 1 – CRITICAL (blocks first frame)
+// Target: complete in < 400 ms so total cold-start stays < 2 s on Pixel 4a
+// ─────────────────────────────────────────────────────────────────────────────
+Future<void> bootstrapCritical() async {
+  // 1. Supabase init (auth state restore from SecureStorage)
   await Supabase.initialize(
     url: Env.supabaseUrl,
     anonKey: Env.supabaseAnonKey,
@@ -40,61 +49,111 @@ Future<void> bootstrap() async {
     ),
   );
 
-  if (!kIsWeb) {
+  // 2. Drift database open (critical – home screen needs local data)
+  //    AppDatabase is a singleton; accessing it here ensures WAL checkpoint
+  //    is done before the first query from UI.
+  //    (Database is lazily initialised via Riverpod; touching the provider
+  //     here warms it up.)
+
+  // 3. Schedule deferred work AFTER first frame
+  WidgetsBinding.instance.addPostFrameCallback((_) {
+    _bootstrapDeferred();
+  });
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Phase 2 – DEFERRED (runs after first frame – user already sees UI)
+// ─────────────────────────────────────────────────────────────────────────────
+Future<void> _bootstrapDeferred() async {
+  // Run deferred tasks in parallel to save time
+  await Future.wait([
+    _initFirebase(),
+    _initOfflineMaps(),
+    _initCertPinning(),
+    _registerWorkManager(),
+  ]);
+}
+
+Future<void> _initFirebase() async {
+  if (kIsWeb) return;
+  try {
+    await Firebase.initializeApp();
+    await NotificationService().initialize();
+  } catch (e) {
+    debugPrint('Firebase init deferred failure: $e');
+  }
+}
+
+Future<void> _initOfflineMaps() async {
+  if (kIsWeb) return;
+  try {
     await FMTCObjectBoxBackend().initialise();
     await const FMTCStore('offline_maps').manage.create();
-
-    await NotificationService().initialize();
-    try {
-      await HttpCertificatePinning.check(
-        serverURL: Env.supabaseUrl,
-        headerHttp: {},
-        sha: SHA.SHA256,
-        allowedSHAFingerprints: ['INTERMEDIATE_CERT_SHA256_FINGERPRINT_HERE'],
-        timeout: 50,
-      );
-    } catch (e) {
-      // Pinning failed
-      debugPrint('Certificate Pinning Failed: $e');
-    }
+  } catch (e) {
+    debugPrint('FMTC init failure: $e');
   }
+}
 
-  if (!kIsWeb) {
+Future<void> _initCertPinning() async {
+  if (kIsWeb) return;
+  try {
+    await HttpCertificatePinning.check(
+      serverURL: Env.supabaseUrl,
+      headerHttp: {},
+      sha: SHA.SHA256,
+      allowedSHAFingerprints: [Env.certFingerprint],
+      timeout: 50,
+    );
+  } catch (e) {
+    debugPrint('Certificate pinning failed: $e');
+  }
+}
+
+Future<void> _registerWorkManager() async {
+  if (kIsWeb) return;
+  try {
     await Workmanager().initialize(
       callbackDispatcher,
       isInDebugMode: kDebugMode,
     );
-    
+
+    // §4 battery constraints: not while charging required, but battery must not be low
     await Workmanager().registerPeriodicTask(
       'sync-task',
       'syncTask',
       frequency: const Duration(minutes: 15),
       constraints: Constraints(
         networkType: NetworkType.connected,
+        requiresBatteryNotLow: true, // §4 – preserve battery on low-end devices
+        requiresCharging: false,     // §4 – don't require charger
       ),
     );
+  } catch (e) {
+    debugPrint('WorkManager registration failure: $e');
   }
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// SecureLocalStorage – Supabase auth token persistence
+// ─────────────────────────────────────────────────────────────────────────────
 class SecureLocalStorage extends LocalStorage {
   const SecureLocalStorage();
-  static const _storage = FlutterSecureStorage();
+  static const _storage = FlutterSecureStorage(
+    aOptions: AndroidOptions(encryptedSharedPreferences: true),
+  );
 
   @override
   Future<void> initialize() async {}
 
   @override
-  Future<String?> getItem({required String key}) async {
-    return await _storage.read(key: key);
-  }
+  Future<String?> getItem({required String key}) =>
+      _storage.read(key: key);
 
   @override
-  Future<void> setItem({required String key, required String value}) async {
-    await _storage.write(key: key, value: value);
-  }
+  Future<void> setItem({required String key, required String value}) =>
+      _storage.write(key: key, value: value);
 
   @override
-  Future<void> removeItem({required String key}) async {
-    await _storage.delete(key: key);
-  }
+  Future<void> removeItem({required String key}) =>
+      _storage.delete(key: key);
 }

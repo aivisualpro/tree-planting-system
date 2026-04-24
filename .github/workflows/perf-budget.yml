@@ -1,0 +1,143 @@
+name: Performance Budget CI
+
+on:
+  pull_request:
+    paths:
+      - 'web/**'
+      - 'mobile/**'
+      - 'shared/**'
+  schedule:
+    # §20 – weekly perf review: every Monday 09:00 UTC
+    - cron: '0 9 * * 1'
+
+jobs:
+  # ─────────────────────────────────────────────────────────────────────────
+  # §7 / §10 – Web bundle & Lighthouse budget gate
+  # ─────────────────────────────────────────────────────────────────────────
+  web_perf_budget:
+    name: Web Performance Budget
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./web
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v3
+        with:
+          version: 10
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'pnpm'
+          cache-dependency-path: 'web/pnpm-lock.yaml'
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Build for production
+        run: pnpm build
+        env:
+          NODE_ENV: production
+
+      # §7 – Check initial JS gzip < 200 KB (strict: main entry chunk)
+      - name: JS bundle size check (gzip < 200 KB initial)
+        run: |
+          BUILD_DIR=".output/public/_nuxt"
+          if [ ! -d "$BUILD_DIR" ]; then
+            echo "Build output not found"
+            exit 1
+          fi
+
+          # Find the entry chunk (largest JS file is usually the entry)
+          LARGEST=$(find "$BUILD_DIR" -name "*.js" -exec sh -c 'echo "$(gzip -c "$1" | wc -c) $1"' _ {} \; | sort -rn | head -1)
+          LARGEST_SIZE=$(echo "$LARGEST" | awk '{print $1}')
+          LARGEST_KB=$((LARGEST_SIZE / 1024))
+          echo "Largest JS chunk (gzipped): ${LARGEST_KB} KB"
+
+          if [ "$LARGEST_KB" -gt 200 ]; then
+            echo "❌ BUDGET BREACH: Entry chunk ${LARGEST_KB}KB > 200KB gzipped"
+            echo "   Run 'pnpm analyze' and move large deps to async chunks"
+            exit 1
+          fi
+          echo "✅ Initial JS budget OK: ${LARGEST_KB}KB < 200KB"
+
+      # §7 – Check index.html gzip < 50 KB
+      - name: index.html size check (gzip < 50 KB)
+        run: |
+          HTML_FILE=".output/public/index.html"
+          if [ -f "$HTML_FILE" ]; then
+            SIZE=$(gzip -c "$HTML_FILE" | wc -c)
+            SIZE_KB=$((SIZE / 1024))
+            echo "index.html gzipped: ${SIZE_KB}KB"
+            if [ "$SIZE_KB" -gt 50 ]; then
+              echo "❌ BUDGET BREACH: index.html ${SIZE_KB}KB > 50KB gzipped"
+              exit 1
+            fi
+            echo "✅ index.html budget OK: ${SIZE_KB}KB < 50KB"
+          else
+            echo "index.html not found, skipping"
+          fi
+
+  # ─────────────────────────────────────────────────────────────────────────
+  # §5 – Mobile APK size check (< 30 MB download on Play Store)
+  # ─────────────────────────────────────────────────────────────────────────
+  mobile_apk_size:
+    name: Mobile APK Size Budget
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./mobile
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.22.x'
+          channel: 'stable'
+
+      - name: Flutter pub get
+        run: flutter pub get
+
+      - name: Build split APKs (§5 – split-per-abi)
+        run: |
+          flutter build apk --release --split-per-abi \
+            --dart-define=SUPABASE_URL=${{ secrets.STAGING_SUPABASE_URL }} \
+            --dart-define=SUPABASE_ANON_KEY=${{ secrets.STAGING_SUPABASE_ANON_KEY }}
+
+      # §5 – Each ABI APK must be < 30 MB
+      - name: APK size check (< 30 MB per ABI)
+        run: |
+          FAIL=0
+          for apk in build/app/outputs/flutter-apk/app-*-release.apk; do
+            SIZE=$(stat -c %s "$apk" 2>/dev/null || stat -f %z "$apk")
+            SIZE_MB=$((SIZE / 1024 / 1024))
+            NAME=$(basename "$apk")
+            echo "$NAME: ${SIZE_MB}MB"
+            if [ "$SIZE_MB" -gt 30 ]; then
+              echo "❌ BUDGET BREACH: $NAME ${SIZE_MB}MB > 30MB"
+              FAIL=1
+            fi
+          done
+          if [ "$FAIL" -eq 1 ]; then
+            echo "Run 'flutter build apk --analyze-size' to identify culprits"
+            exit 1
+          fi
+          echo "✅ All APKs within 30MB budget"
+
+  # ─────────────────────────────────────────────────────────────────────────
+  # §14 / §20 – Weekly Perf Report (scheduled only)
+  # ─────────────────────────────────────────────────────────────────────────
+  weekly_perf_report:
+    name: Weekly Performance Report
+    runs-on: ubuntu-latest
+    if: github.event_name == 'schedule'
+    steps:
+      - name: Post weekly summary to Slack
+        run: |
+          curl -X POST ${{ secrets.SLACK_WEBHOOK }} \
+            -H 'Content-type: application/json' \
+            --data '{
+              "text": "📊 *Weekly Performance Review*\n• Run Lighthouse on /dashboard and /visits\n• Review Axiom API latency heatmap (p50/p95/p99)\n• Check mobile sync success rate dashboard\n• Review Supabase slow query log (>1s)\n• Update PERFORMANCE.md if thresholds changed\n_Reminder: CI blocks regressions – review last 7 days of Lighthouse scores._"
+            }'

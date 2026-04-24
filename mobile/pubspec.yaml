@@ -74,9 +74,14 @@ dependencies:
   local_auth: ^2.2.0
   flutter_jailbreak_detection: ^1.2.0
   
-  # Firebase Notifications
+  # Firebase Notifications + Performance (§1)
   firebase_core: ^2.27.0
   firebase_messaging: ^14.7.19
+  firebase_performance: ^0.9.4+4
+
+  # Performance monitoring
+  # §3 – background isolate image decoding
+  image: ^4.2.0
 dev_dependencies:
   flutter_test:
     sdk: flutter

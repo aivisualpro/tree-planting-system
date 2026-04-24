@@ -25,20 +25,36 @@ export default defineNuxtConfig({
     ],
     optimizeDeps: {
       include: ['cookie', '@supabase/ssr'],
-      exclude: ['@supabase/postgrest-js']
+      exclude: ['@supabase/postgrest-js'],
     },
     resolve: {
       alias: {
-        cookie: 'cookie-es'
-      }
+        cookie: 'cookie-es',
+        // §7 – tree-shake lodash: force named-function imports
+        'lodash': 'lodash-es',
+      },
     },
     build: {
+      // §7 – bundle analysis + chunk splitting
+      chunkSizeWarningLimit: 200, // warn if any chunk > 200 KB
       rollupOptions: {
         onwarn(warning, warn) {
           if (warning.message.includes('"PostgrestError"') || warning.message.includes('@supabase')) return
           warn(warning)
-        }
-      }
+        },
+        output: {
+          manualChunks(id) {
+            // §7 – move ECharts into its own async chunk (lazy-loaded)
+            if (id.includes('echarts') || id.includes('zrender')) {
+              return 'echarts'
+            }
+            // Vendor split
+            if (id.includes('node_modules/@supabase')) return 'supabase'
+            if (id.includes('node_modules/date-fns')) return 'date-fns'
+            if (id.includes('node_modules/zod')) return 'zod'
+          },
+        },
+      },
     },
     server: {
       watch: {
@@ -47,7 +63,7 @@ export default defineNuxtConfig({
         ignored: ['**/node_modules/**', '**/.git/**'],
       },
       fs: {
-        allow: ['..']
+        allow: ['..'],
       },
     },
   },
@@ -65,9 +81,8 @@ export default defineNuxtConfig({
           warn(warning)
         }
       }
-    }
+    },
   },
-
 
   components: [
     {
@@ -84,10 +99,31 @@ export default defineNuxtConfig({
     '@pinia/nuxt',
     '@nuxtjs/color-mode',
     '@nuxt/fonts',
+    '@nuxt/image',       // §8 – responsive images + webp
     '@nuxtjs/supabase',
     '@nuxtjs/i18n',
     'nuxt-security',
   ],
+
+  // §8 – @nuxt/image configuration
+  image: {
+    quality: 80,
+    format: ['webp', 'avif', 'jpeg'],
+    screens: {
+      xs: 320,
+      sm: 640,
+      md: 768,
+      lg: 1024,
+      xl: 1280,
+    },
+    // Supabase Storage image transformations (§8)
+    providers: {
+      supabase: {
+        name: 'supabase',
+        provider: '~/providers/supabase-image.ts',
+      },
+    },
+  },
 
   supabase: {
     redirect: true,
@@ -105,19 +141,12 @@ export default defineNuxtConfig({
     locales: [
       { code: 'en', file: 'en.json' },
       { code: 'es', file: 'es.json' },
-      { code: 'sw', file: 'sw.json' }
-    ]
+      { code: 'sw', file: 'sw.json' },
+    ],
   },
 
   shadcn: {
-    /**
-     * Prefix for all the imported component
-     */
     prefix: '',
-    /**
-     * Directory that the component lives in.
-     * @default "~/components/ui"
-     */
     componentDir: '~/components/ui',
   },
 
@@ -137,17 +166,31 @@ export default defineNuxtConfig({
     },
   },
 
+  // §11 – ISR + route-level optimizations
   routeRules: {
     '/components': { redirect: '/components/accordion' },
     '/settings': { redirect: '/settings/profile' },
+
+    // §11 – ISR for dashboard (revalidate every 60 s, CDN-cached)
+    '/dashboard': { isr: 60, prerender: false },
+
+    // §11 – visits list: short ISR + cache headers
+    '/visits': { isr: 30 },
+
+    // Static assets: long cache
+    '/_nuxt/**': { headers: { 'cache-control': 's-maxage=31536000,immutable' } },
+
+    // API routes: no-store, fine-grained caching in handler
+    '/api/**': { headers: { 'cache-control': 'no-store' } },
   },
 
   runtimeConfig: {
     serviceRoleKey: process.env.SUPABASE_SERVICE_KEY,
-    // Note: Do NOT add serviceRoleKey to public!
+    axiomApiKey: process.env.AXIOM_API_KEY,
+    axiomDataset: process.env.AXIOM_DATASET || 'tree-planting-prod',
     public: {
       // public configs go here
-    }
+    },
   },
 
   // @ts-ignore - Module types not loaded
@@ -155,7 +198,16 @@ export default defineNuxtConfig({
     headers: {
       contentSecurityPolicy: {
         'default-src': ["'self'"],
-        'connect-src': ["'self'", 'http://127.0.0.1:54321', 'ws://127.0.0.1:54321', 'http://localhost:54321', 'ws://localhost:54321', 'https://*.supabase.co', 'wss://*.supabase.co'],
+        'connect-src': [
+          "'self'",
+          'http://127.0.0.1:54321',
+          'ws://127.0.0.1:54321',
+          'http://localhost:54321',
+          'ws://localhost:54321',
+          'https://*.supabase.co',
+          'wss://*.supabase.co',
+          'https://api.axiom.co',
+        ],
         'base-uri': ["'self'"],
         'font-src': ["'self'", 'https:', 'data:'],
         'form-action': ["'self'"],
@@ -165,20 +217,24 @@ export default defineNuxtConfig({
         'script-src-attr': ["'none'"],
         'style-src': ["'self'", 'https:', "'unsafe-inline'"],
         'script-src': ["'self'", 'https:', "'unsafe-inline'", "'strict-dynamic'", "'nonce-{{nonce}}'"],
-        'upgrade-insecure-requests': true
+        'upgrade-insecure-requests': true,
       },
       xFrameOptions: 'DENY',
       referrerPolicy: 'strict-origin-when-cross-origin',
       strictTransportSecurity: {
         maxAge: 31536000,
         includeSubdomains: true,
-        preload: true
-      }
+        preload: true,
+      },
     },
     corsHandler: {
-      origin: ['https://tree-planting-system.aivisualpro.com', 'https://staging.tree-planting-system.aivisualpro.com', 'http://localhost:3000'],
-      methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE']
-    }
+      origin: [
+        'https://tree-planting-system.aivisualpro.com',
+        'https://staging.tree-planting-system.aivisualpro.com',
+        'http://localhost:3000',
+      ],
+      methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE'],
+    },
   },
 
   imports: {
