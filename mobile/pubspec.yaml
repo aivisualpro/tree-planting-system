@@ -81,6 +81,12 @@ dependencies:
   firebase_messaging: ^14.7.19
   firebase_performance: ^0.9.4+4
 
+  # Onboarding & Tutorial
+  showcaseview: ^3.0.0
+  introduction_screen: ^3.1.14
+  pdf: any
+  printing: any
+
   # Performance monitoring
   # §3 – background isolate image decoding
   image: ^4.2.0

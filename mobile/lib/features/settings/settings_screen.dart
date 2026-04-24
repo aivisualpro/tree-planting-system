@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'language_picker.dart';
 import 'training_mode_provider.dart';
+import '../profile/profile_provider.dart';
+import 'certificate_generator.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -10,6 +12,7 @@ class SettingsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final isTrainingMode = ref.watch(trainingModeProvider);
+    final profileState = ref.watch(profileStateProvider);
 
     return Scaffold(
       appBar: AppBar(title: const Text('Settings')),
@@ -57,6 +60,16 @@ class SettingsScreen extends ConsumerWidget {
             onTap: () => context.go('/settings/offline-maps'),
           ),
           const Divider(),
+          if (profileState.value?['tutorial_completed'] == true)
+            ListTile(
+              title: const Text('View Training Certificate'),
+              trailing: const Icon(Icons.workspace_premium, color: Colors.amber),
+              onTap: () {
+                final user = profileState.value;
+                final name = user?['email'] ?? 'Field User';
+                CertificateGenerator.generateAndShareCertificate(name);
+              },
+            ),
           ListTile(
             title: const Text('Help & Support'),
             trailing: const Icon(Icons.help_outline),

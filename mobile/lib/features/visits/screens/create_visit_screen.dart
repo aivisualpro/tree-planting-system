@@ -1,25 +1,64 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:uuid/uuid.dart';
 import '../controllers/visit_draft_controller.dart';
 import 'package:latlong2/latlong.dart';
 import '../../../core/widgets/offline_map_widget.dart';
 import '../../../core/storage/storage_provider.dart';
-class CreateVisitScreen extends ConsumerStatefulWidget {
-  const CreateVisitScreen({super.key});
+import 'package:showcaseview/showcaseview.dart';
+import '../../profile/profile_provider.dart';
 
+class CreateVisitScreen extends StatelessWidget {
+  const CreateVisitScreen({super.key});
+  
   @override
-  ConsumerState<CreateVisitScreen> createState() => _CreateVisitScreenState();
+  Widget build(BuildContext context) {
+    return ShowCaseWidget(
+      builder: Builder(builder: (context) => const _CreateVisitScreenInner()),
+    );
+  }
 }
 
-class _CreateVisitScreenState extends ConsumerState<CreateVisitScreen> {
+class _CreateVisitScreenInner extends ConsumerStatefulWidget {
+  const _CreateVisitScreenInner();
+
+  @override
+  ConsumerState<_CreateVisitScreenInner> createState() => _CreateVisitScreenState();
+}
+
+class _CreateVisitScreenState extends ConsumerState<_CreateVisitScreenInner> {
   int _currentStep = 0;
   late final String _clientUuid;
+  
+  final GlobalKey _step1Key = GlobalKey();
+  final GlobalKey _step2Key = GlobalKey();
+  final GlobalKey _step3Key = GlobalKey();
+  final GlobalKey _step4Key = GlobalKey();
 
   @override
   void initState() {
     super.initState();
     _clientUuid = const Uuid().v4();
+    
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _checkAndStartTutorial();
+    });
+  }
+
+  void _checkAndStartTutorial() async {
+    final profileState = ref.read(profileStateProvider);
+    final profile = profileState.value;
+    
+    final forceTutorial = profile?['force_tutorial'] == true;
+    final tutorialCompleted = profile?['tutorial_completed'] == true;
+    
+    if (forceTutorial || !tutorialCompleted) {
+      ShowCaseWidget.of(context).startShowCase([_step1Key, _step2Key, _step3Key, _step4Key]);
+      if (!tutorialCompleted) {
+        ref.read(profileStateProvider.notifier).completeTutorial();
+      }
+    }
   }
 
   @override
@@ -32,7 +71,16 @@ class _CreateVisitScreenState extends ConsumerState<CreateVisitScreen> {
     final isWarning = storageUsage > 0.80 && !isCritical;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Create Visit')),
+      appBar: AppBar(
+        title: const Text('Create Visit'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.help_outline),
+            tooltip: 'Help',
+            onPressed: () => context.push('/settings/help'),
+          ),
+        ],
+      ),
       body: Column(
         children: [
           if (isCritical)
@@ -70,7 +118,11 @@ class _CreateVisitScreenState extends ConsumerState<CreateVisitScreen> {
         },
         steps: [
           Step(
-            title: const Text('Basics'),
+            title: Showcase(
+              key: _step1Key,
+              description: 'Start by filling out the basic details like date and country.',
+              child: const Text('Basics'),
+            ),
             content: Column(
               children: [
                 TextFormField(decoration: const InputDecoration(labelText: 'Scheduled Date & Time')),
@@ -81,7 +133,11 @@ class _CreateVisitScreenState extends ConsumerState<CreateVisitScreen> {
             isActive: _currentStep >= 0,
           ),
           Step(
-            title: const Text('Activity'),
+            title: Showcase(
+              key: _step2Key,
+              description: 'Next, select the core area and specific activity for this visit.',
+              child: const Text('Activity'),
+            ),
             content: Column(
               children: [
                 DropdownButtonFormField(items: const [], onChanged: (v) {}, decoration: const InputDecoration(labelText: 'Core Area')),
@@ -92,7 +148,11 @@ class _CreateVisitScreenState extends ConsumerState<CreateVisitScreen> {
             isActive: _currentStep >= 1,
           ),
           Step(
-            title: const Text('Trees'),
+            title: Showcase(
+              key: _step3Key,
+              description: 'Add the different tree species planted and their counts here.',
+              child: const Text('Trees'),
+            ),
             content: Column(
               children: [
                 const Text('Dynamic list of species rows'),
@@ -103,7 +163,11 @@ class _CreateVisitScreenState extends ConsumerState<CreateVisitScreen> {
             isActive: _currentStep >= 2,
           ),
           Step(
-            title: const Text('Evidence & Review'),
+            title: Showcase(
+              key: _step4Key,
+              description: 'Finally, capture a group photo, collect a signature, and confirm your GPS location.',
+              child: const Text('Evidence & Review'),
+            ),
             content: Column(
               children: [
                 ElevatedButton.icon(onPressed: () {}, icon: const Icon(Icons.camera_alt), label: const Text('Group Photo (Required)')),

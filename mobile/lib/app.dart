@@ -7,8 +7,8 @@ import 'core/notifications/notification_service.dart';
 
 import 'core/sync/sync_provider.dart';
 import 'features/settings/training_mode_provider.dart';
-import 'core/config/app_version_repository.dart';
 import 'core/config/feature_flags_repository.dart';
+import 'features/profile/profile_provider.dart';
 
 class App extends ConsumerStatefulWidget {
   const App({super.key});
@@ -61,7 +61,17 @@ class _AppState extends ConsumerState<App> with WidgetsBindingObserver {
         themeMode: ThemeMode.system,
         routerConfig: router,
         builder: (context, child) {
-          if (!isTrainingMode) return child!;
+          final profileState = ref.watch(profileStateProvider);
+          final profile = profileState.value;
+          
+          final isForcedTraining = profile?['training_required'] == true;
+          final isForcedTutorial = profile?['force_tutorial'] == true;
+          final hasCompletedTutorial = profile?['tutorial_completed'] == true;
+          
+          // Force training mode ON if the profile dictates it
+          final effectiveTrainingMode = isTrainingMode || isForcedTraining;
+          
+          if (!effectiveTrainingMode) return child!;
           return Directionality(
             textDirection: TextDirection.ltr,
             child: Column(

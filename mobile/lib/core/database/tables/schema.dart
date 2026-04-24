@@ -5,6 +5,9 @@ class Profiles extends Table {
   TextColumn get email => text().nullable()();
   TextColumn get role => text().nullable()();
   BoolColumn get viewAllVisits => boolean().withDefault(const Constant(false))();
+  BoolColumn get forceTutorial => boolean().withDefault(const Constant(false))();
+  BoolColumn get trainingRequired => boolean().withDefault(const Constant(false))();
+  BoolColumn get tutorialCompleted => boolean().withDefault(const Constant(false))();
   
   @override
   Set<Column> get primaryKey => {id};

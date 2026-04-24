@@ -69,7 +69,7 @@ We collect location, photos, device ID, and contact details for operational repo
       debugPrint('Error updating terms acceptance: $e');
     }
     if (mounted) {
-      context.go('/preload');
+      context.go('/onboarding');
     }
   }
 
