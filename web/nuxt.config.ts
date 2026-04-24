@@ -86,6 +86,7 @@ export default defineNuxtConfig({
     '@nuxt/fonts',
     '@nuxtjs/supabase',
     '@nuxtjs/i18n',
+    '@nuxtjs/security',
   ],
 
   supabase: {
@@ -139,6 +140,43 @@ export default defineNuxtConfig({
   routeRules: {
     '/components': { redirect: '/components/accordion' },
     '/settings': { redirect: '/settings/profile' },
+  },
+
+  runtimeConfig: {
+    serviceRoleKey: process.env.SUPABASE_SERVICE_KEY,
+    // Note: Do NOT add serviceRoleKey to public!
+    public: {
+      // public configs go here
+    }
+  },
+
+  security: {
+    headers: {
+      contentSecurityPolicy: {
+        'default-src': ["'self'"],
+        'base-uri': ["'self'"],
+        'font-src': ["'self'", 'https:', 'data:'],
+        'form-action': ["'self'"],
+        'frame-ancestors': ["'none'"],
+        'img-src': ["'self'", 'data:', 'https:', 'blob:'],
+        'object-src': ["'none'"],
+        'script-src-attr': ["'none'"],
+        'style-src': ["'self'", 'https:', "'unsafe-inline'"],
+        'script-src': ["'self'", 'https:', "'unsafe-inline'", "'strict-dynamic'", "'nonce-{{nonce}}'"],
+        'upgrade-insecure-requests': true
+      },
+      xFrameOptions: 'DENY',
+      referrerPolicy: 'strict-origin-when-cross-origin',
+      strictTransportSecurity: {
+        maxAge: 31536000,
+        includeSubdomains: true,
+        preload: true
+      }
+    },
+    corsHandler: {
+      origin: ['https://tree-planting-system.aivisualpro.com', 'https://staging.tree-planting-system.aivisualpro.com', 'http://localhost:3000'],
+      methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE']
+    }
   },
 
   imports: {

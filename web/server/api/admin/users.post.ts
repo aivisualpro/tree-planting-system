@@ -14,10 +14,12 @@ export default defineEventHandler(async (event) => {
   const body = await readValidatedBody(event, inviteSchema.parse)
   const client = serverSupabaseServiceRole(event)
 
+  await logAdminAction(event, 'invite_user', { email: body.email, role: body.role })
+
   // In a real implementation, we would use client.auth.admin.inviteUserByEmail()
   // and insert a row into our custom `users` table.
   // For the scaffold, we just insert into our public users table to simulate.
-  const { data, error } = await (client as any).from('users')
+  const { data, error } = await (client as any).from('profiles')
     .insert({
       email: body.email,
       role: body.role,

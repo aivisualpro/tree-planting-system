@@ -1,7 +1,14 @@
 import { serverSupabaseServiceRole } from '#supabase/server'
 import type { Database } from '../../../../shared/types/database'
+import { z } from 'zod'
+
+const dashboardQuerySchema = z.object({
+  countryId: z.string().uuid().optional(),
+  dateRange: z.string().optional()
+})
 
 export default defineEventHandler(async (event) => {
+  const query = await getValidatedQuery(event, dashboardQuerySchema.parse)
   const client = serverSupabaseServiceRole<Database>(event)
 
   // Use the materialized view for high-performance KPI aggregation
