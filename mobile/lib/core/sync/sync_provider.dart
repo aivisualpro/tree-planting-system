@@ -8,9 +8,10 @@ import 'media_uploader.dart';
 import 'delta_puller.dart';
 import 'retry_policy.dart';
 
+import '../../features/settings/training_mode_provider.dart';
+
 part 'sync_provider.g.dart';
 
-import '../../features/settings/training_mode_provider.dart';
 
 @Riverpod(keepAlive: true)
 AppDatabase appDatabase(AppDatabaseRef ref) {

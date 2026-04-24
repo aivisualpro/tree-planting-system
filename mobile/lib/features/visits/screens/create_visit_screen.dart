@@ -15,7 +15,7 @@ class CreateVisitScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ShowCaseWidget(
-      builder: Builder(builder: (context) => const _CreateVisitScreenInner()),
+      builder: (context) => const _CreateVisitScreenInner(),
     );
   }
 }
@@ -179,7 +179,7 @@ class _CreateVisitScreenState extends ConsumerState<_CreateVisitScreenInner> {
                   height: 200,
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(8),
-                    child: const OfflineMapWidget(
+                    child: OfflineMapWidget(
                       initialCenter: LatLng(-6.173, 35.741),
                       initialZoom: 10.0,
                       interactive: true,
@@ -193,6 +193,7 @@ class _CreateVisitScreenState extends ConsumerState<_CreateVisitScreenInner> {
             isActive: _currentStep >= 3,
           ),
         ],
+                ),
               ),
             ),
           ),

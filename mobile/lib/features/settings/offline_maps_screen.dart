@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart';
+import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 
 class OfflineMapsScreen extends ConsumerStatefulWidget {
@@ -20,17 +21,17 @@ class _OfflineMapsScreenState extends ConsumerState<OfflineMapsScreen> {
   final List<Map<String, dynamic>> assignedCountries = [
     {
       'name': 'Tanzania',
-      'bounds': LatLngBounds(
-        const LatLng(-11.7, 29.3),
-        const LatLng(-1.0, 40.4),
-      ),
+      'south': -11.7,
+      'west': 29.3,
+      'north': -1.0,
+      'east': 40.4,
     },
     {
       'name': 'Kenya',
-      'bounds': LatLngBounds(
-        const LatLng(-4.7, 33.9),
-        const LatLng(4.6, 41.9),
-      ),
+      'south': -4.7,
+      'west': 33.9,
+      'north': 4.6,
+      'east': 41.9,
     },
   ];
 
@@ -66,10 +67,7 @@ class _OfflineMapsScreenState extends ConsumerState<OfflineMapsScreen> {
                     icon: const Icon(Icons.download),
                     onPressed: isDownloading
                         ? null
-                        : () => _downloadRegion(
-                              country['name'],
-                              country['bounds'],
-                            ),
+                        : () => _downloadRegion(country),
                   ),
                 );
               },
@@ -87,12 +85,17 @@ class _OfflineMapsScreenState extends ConsumerState<OfflineMapsScreen> {
     );
   }
 
-  Future<void> _downloadRegion(String name, LatLngBounds bounds) async {
+  Future<void> _downloadRegion(Map<String, dynamic> country) async {
     setState(() {
       isDownloading = true;
       progress = 0.0;
-      currentRegion = name;
+      currentRegion = country['name'];
     });
+
+    final bounds = LatLngBounds(
+      LatLng(country['south'] as double, country['west'] as double),
+      LatLng(country['north'] as double, country['east'] as double),
+    );
 
     final region = RectangleRegion(bounds);
     final downloadableRegion = region.toDownloadable(
@@ -104,14 +107,15 @@ class _OfflineMapsScreenState extends ConsumerState<OfflineMapsScreen> {
     );
 
     try {
-      await for (final progressEvent in store.download.startForeground(region: downloadableRegion)) {
+      final result = store.download.startForeground(region: downloadableRegion);
+      await for (final progressEvent in result.downloadProgress) {
         setState(() {
           progress = progressEvent.percentageProgress / 100.0;
         });
       }
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('$name map downloaded successfully')),
+          SnackBar(content: Text('${country['name']} map downloaded successfully')),
         );
       }
     } catch (e) {

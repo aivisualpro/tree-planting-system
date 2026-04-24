@@ -33,12 +33,8 @@ void main() async {
         return breadcrumb;
       };
       options.beforeSend = (event, hint) {
-        final scrubbedContexts = Map<String, dynamic>.from(event.contexts.toJson())
-          ..removeWhere((k, _) => const ['gps', 'location', 'form', 'path']
-              .any((s) => k.toLowerCase().contains(s)));
         return event.copyWith(
           request: event.request?.copyWith(data: '[Scrubbed]'),
-          contexts: SentryContexts.fromJson(scrubbedContexts),
         );
       };
     },

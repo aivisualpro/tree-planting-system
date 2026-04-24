@@ -7,10 +7,10 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:workmanager/workmanager.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 // import 'package:http_certificate_pinning/http_certificate_pinning.dart';
-import 'package:firebase_core/firebase_core.dart';
+// import 'package:firebase_core/firebase_core.dart'; // Disabled: incompatible with Xcode 26
 import 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart';
 import 'core/config/env.dart';
-import 'core/notifications/notification_service.dart';
+// import 'core/notifications/notification_service.dart'; // Disabled: requires Firebase
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'core/sync/sync_provider.dart';
 
@@ -67,7 +67,7 @@ Future<void> bootstrapCritical() async {
 Future<void> _bootstrapDeferred() async {
   // Run deferred tasks in parallel to save time
   await Future.wait([
-    _initFirebase(),
+    // _initFirebase(), // Disabled: Firebase incompatible with Xcode 26
     _initOfflineMaps(),
     // _initCertPinning(),
     _registerWorkManager(),
@@ -75,13 +75,9 @@ Future<void> _bootstrapDeferred() async {
 }
 
 Future<void> _initFirebase() async {
-  if (kIsWeb) return;
-  try {
-    await Firebase.initializeApp();
-    await NotificationService().initialize();
-  } catch (e) {
-    debugPrint('Firebase init deferred failure: $e');
-  }
+  // Firebase disabled — incompatible with Xcode 26
+  // Re-enable when upgrading to firebase_core ^3.x
+  debugPrint('Firebase init skipped (disabled)');
 }
 
 Future<void> _initOfflineMaps() async {
@@ -144,6 +140,8 @@ class SecureLocalStorage extends LocalStorage {
     aOptions: AndroidOptions(encryptedSharedPreferences: true),
   );
 
+  static const _sessionKey = 'supabase_session';
+
   @override
   Future<void> initialize() async {}
 
@@ -158,4 +156,25 @@ class SecureLocalStorage extends LocalStorage {
   @override
   Future<void> removeItem({required String key}) =>
       _storage.delete(key: key);
+
+  @override
+  Future<bool> hasAccessToken() async {
+    final token = await _storage.read(key: _sessionKey);
+    return token != null;
+  }
+
+  @override
+  Future<String?> accessToken() async {
+    return _storage.read(key: _sessionKey);
+  }
+
+  @override
+  Future<void> persistSession(String persistSessionString) async {
+    await _storage.write(key: _sessionKey, value: persistSessionString);
+  }
+
+  @override
+  Future<void> removePersistedSession() async {
+    await _storage.delete(key: _sessionKey);
+  }
 }

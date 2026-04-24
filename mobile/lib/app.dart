@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'router/app_router.dart';
 import 'core/theme/app_theme.dart';
 import 'core/notifications/notification_service.dart';
+import 'core/config/app_version_repository.dart';
 
 import 'core/sync/sync_provider.dart';
 import 'features/settings/training_mode_provider.dart';

@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 import 'dart:typed_data';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../database/app_database.dart';
@@ -41,7 +42,7 @@ class DeltaPuller {
       if (rows.isEmpty) break;
 
       // Batch upsert the entire page in a single DB transaction (§17)
-      await syncMetadataDao.db.transaction(() async {
+      await visitsDao.attachedDatabase.transaction(() async {
         for (final row in rows) {
           final rowMap = row as Map<String, dynamic>;
           final serverId = rowMap['id'] as String;

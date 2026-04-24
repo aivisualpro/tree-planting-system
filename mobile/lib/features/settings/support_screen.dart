@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import '../../core/sync/sync_provider.dart';
 
 class SupportScreen extends ConsumerStatefulWidget {
   const SupportScreen({super.key});
@@ -35,32 +34,22 @@ class _SupportScreenState extends ConsumerState<SupportScreen> {
       final info = await PackageInfo.fromPlatform();
       final user = Supabase.instance.client.auth.currentUser;
       
-      // We simulate creating a notification_events type support_request
-      // In offline mode, this should ideally be handled by drift outbox.
-      // For this step, we push directly to Drift's outbox if possible, or straight to Supabase.
-      final drift = ref.read(dbProvider);
-      
       final payload = {
         'issue_description': _controller.text,
         'app_version': info.version,
         'user_id': user?.id,
         'has_screenshot': _screenshot != null,
-        // attach last sync log conceptually
       };
 
-      // Write to Drift Outbox for offline reliability
-      await drift.into(drift.outboxEvents).insert(
-        OutboxEventsCompanion.insert(
-          id: DateTime.now().millisecondsSinceEpoch.toString(),
-          entityType: 'notification_events',
-          entityId: DateTime.now().millisecondsSinceEpoch.toString(),
-          operation: 'INSERT',
-          payload: payload.toString(), // or jsonEncode
-        ),
-      );
+      // Push directly to Supabase for now; offline outbox integration is future work
+      await Supabase.instance.client.from('notification_events').insert({
+        'type': 'support_request',
+        'payload': payload,
+        'created_at': DateTime.now().toIso8601String(),
+      });
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Issue reported successfully. It will sync automatically.')));
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Issue reported successfully.')));
         Navigator.pop(context);
       }
     } catch (e) {

@@ -129,7 +129,7 @@ class VersionOverlay extends ConsumerWidget {
                 const SizedBox(height: 16),
                 if (versionState.releaseNotes != null)
                   Text(
-                    'What\\'s new:\\n${versionState.releaseNotes}',
+                    "What's new:\n${versionState.releaseNotes}",
                     style: const TextStyle(color: Colors.grey),
                   ),
                 const SizedBox(height: 32),

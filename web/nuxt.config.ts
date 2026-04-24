@@ -4,6 +4,14 @@ export default defineNuxtConfig({
   devtools: { enabled: false },
   spaLoadingTemplate: false,
 
+  app: {
+    head: {
+      link: [
+        { rel: 'icon', type: 'image/png', href: '/logo.png' }
+      ]
+    }
+  },
+
   build: {
     transpile: [
       '@supabase/supabase-js',

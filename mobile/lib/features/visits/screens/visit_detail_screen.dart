@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:latlong2/latlong.dart';
-import '../../core/widgets/offline_map_widget.dart';
+import '../../../core/widgets/offline_map_widget.dart';
 
 class VisitDetailScreen extends ConsumerWidget {
   final String visitId;
@@ -39,7 +39,7 @@ class VisitDetailScreen extends ConsumerWidget {
               height: 200,
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(8),
-                child: const OfflineMapWidget(
+                child: OfflineMapWidget(
                   initialCenter: LatLng(-6.173, 35.741), // Example coordinates for Tanzania
                   initialZoom: 10.0,
                   interactive: false,
