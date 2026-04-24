@@ -77,6 +77,7 @@ defineShortcuts({
       </div>
 
       <Toaster :theme="colorMode.preference as any || 'system'" />
+      <CookieBanner />
     </ConfigProvider>
   </Body>
 </template>

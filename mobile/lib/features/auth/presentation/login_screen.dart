@@ -11,7 +11,7 @@ class LoginScreen extends StatelessWidget {
       body: Center(
         child: ElevatedButton(
           onPressed: () {
-            context.go('/preload');
+            context.go('/terms');
           },
           child: const Text('Login'),
         ),

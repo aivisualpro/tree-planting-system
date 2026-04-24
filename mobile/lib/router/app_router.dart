@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../features/auth/presentation/login_screen.dart';
+import '../features/auth/presentation/terms_screen.dart';
 import '../features/home/presentation/home_screen.dart';
 import '../features/visits/screens/visit_list_screen.dart';
 import '../features/visits/screens/create_visit_screen.dart';
@@ -30,6 +31,10 @@ GoRouter appRouter(AppRouterRef ref) {
       GoRoute(
         path: '/login',
         builder: (context, state) => const LoginScreen(),
+      ),
+      GoRoute(
+        path: '/terms',
+        builder: (context, state) => const TermsScreen(),
       ),
       GoRoute(
         path: '/preload',
