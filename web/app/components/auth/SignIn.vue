@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { Loader2 } from 'lucide-vue-next'
+import { toast } from 'vue-sonner'
 import PasswordInput from '~/components/PasswordInput.vue'
 
 const email = ref('admin@aivisualpro.com')
@@ -24,8 +25,13 @@ async function onSubmit(event: Event) {
 
   if (error) {
     console.error('Login error:', error.message)
-    alert(error.message)
+    toast.error('Authentication Failed', {
+      description: error.message,
+    })
   } else {
+    toast.success('Welcome back!', {
+      description: 'You have successfully signed in.',
+    })
     navigateTo('/')
   }
 }

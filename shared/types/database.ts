@@ -1414,6 +1414,11 @@ export type Database = {
       _table_privs: { Args: never; Returns: unknown[] }
       _temptypes: { Args: { "": string }; Returns: string }
       _todo: { Args: never; Returns: string }
+      admin_refresh_materialized_views: { Args: never; Returns: undefined }
+      admin_restore_visit: { Args: { target_visit_id: string }; Returns: undefined }
+      admin_soft_delete_visit: { Args: { target_visit_id: string }; Returns: undefined }
+      bulk_cancel_visits: { Args: { reason: string; visit_ids: string[] }; Returns: undefined }
+      bulk_reassign_visits: { Args: { new_assignee_id: string; visit_ids: string[] }; Returns: undefined }
       col_is_null:
         | {
             Args: {
@@ -1594,7 +1599,13 @@ export type Database = {
         | "coordinator"
         | "field_user"
         | "viewer"
-      visit_status: "draft" | "scheduled" | "completed" | "cancelled"
+      visit_status:
+        | "draft"
+        | "scheduled"
+        | "completed"
+        | "cancelled"
+        | "approved"
+        | "rejected"
     }
     CompositeTypes: {
       _time_trial_type: {
@@ -1744,7 +1755,7 @@ export const Constants = {
         "field_user",
         "viewer",
       ],
-      visit_status: ["draft", "scheduled", "completed", "cancelled"],
+      visit_status: ["draft", "scheduled", "completed", "cancelled", "approved", "rejected"],
     },
   },
 } as const

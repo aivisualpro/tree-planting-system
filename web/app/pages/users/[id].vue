@@ -2,6 +2,8 @@
 import { useRoute } from 'vue-router'
 import { ref } from 'vue'
 
+import { toast } from 'vue-sonner'
+
 const route = useRoute()
 const userId = route.params.id as string
 const { isSuperAdmin } = useRole()
@@ -12,8 +14,13 @@ const handleImpersonate = async () => {
   isLoading.value = true
   try {
     await startImpersonation(userId, `User ${userId}`)
+    toast.success('Impersonation Started', {
+      description: `You are now viewing the app as user ${userId}`,
+    })
   } catch (e: any) {
-    alert(e.message || 'Failed to impersonate')
+    toast.error('Impersonation Failed', {
+      description: e.message || 'Failed to impersonate',
+    })
   } finally {
     isLoading.value = false
   }

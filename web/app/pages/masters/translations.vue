@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
+import { toast } from 'vue-sonner'
 import { useSupabaseClient } from '#imports'
 // @ts-ignore
 import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card'
@@ -94,8 +95,11 @@ const saveTranslation = async (item: any, newValue: string) => {
   if (error) {
     // Rollback on error
     item.value = previousValue
-    alert('Failed to save translation')
+    toast.error('Failed to save translation')
   } else {
+    toast.success('Translation Saved', {
+      description: `${item.entity_type} translation updated.`,
+    })
     calculateCompleteness()
   }
 }
@@ -129,11 +133,13 @@ const addNewLanguage = async () => {
     const { error } = await supabase.from('translations').insert(newRows)
     
     if (error) {
-      alert('Failed to add language')
+      toast.error('Failed to add language')
     } else {
       newLocaleCode.value = ''
       newLocaleName.value = ''
-      alert('Language added successfully')
+      toast.success('Language added successfully', {
+        description: `All entities now have ${newLocaleName.value} placeholder entries.`,
+      })
       fetchTranslations()
     }
   }

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
+import { toast } from 'vue-sonner'
 import { useRouter } from 'vue-router'
 import type { Database } from '../../../../shared/types/database'
 
@@ -60,22 +61,45 @@ const toggleAll = () => {
 const isAllSelected = computed(() => visits.value.length > 0 && selectedVisits.value.length === visits.value.length)
 
 const bulkCancel = async () => {
-  if (!cancelReason.value) return alert('Cancellation reason is required')
+  if (!cancelReason.value) {
+    toast.error('Reason Required', {
+      description: 'Please provide a reason for cancelling these visits.',
+    })
+    return
+  }
   if (!confirm(`Cancel ${selectedVisits.value.length} visits?`)) return
   
-  await supabase.rpc('bulk_cancel_visits', { visit_ids: selectedVisits.value, reason: cancelReason.value })
-  selectedVisits.value = []
-  cancelReason.value = ''
-  fetchVisits()
+  const { error } = await supabase.rpc('bulk_cancel_visits', { visit_ids: selectedVisits.value, reason: cancelReason.value })
+  if (error) {
+    toast.error('Bulk Cancel Failed', {
+      description: error.message,
+    })
+  } else {
+    toast.success('Visits Cancelled', {
+      description: `Successfully cancelled ${selectedVisits.value.length} visits.`,
+    })
+    selectedVisits.value = []
+    cancelReason.value = ''
+    fetchVisits()
+  }
 }
 
 const bulkReassign = async () => {
   const newAssignee = prompt('Enter new assignee User ID:')
   if (!newAssignee) return
   
-  await supabase.rpc('bulk_reassign_visits', { visit_ids: selectedVisits.value, new_assignee_id: newAssignee })
-  selectedVisits.value = []
-  fetchVisits()
+  const { error } = await supabase.rpc('bulk_reassign_visits', { visit_ids: selectedVisits.value, new_assignee_id: newAssignee })
+  if (error) {
+    toast.error('Reassignment Failed', {
+      description: error.message,
+    })
+  } else {
+    toast.success('Visits Reassigned', {
+      description: `Successfully reassigned ${selectedVisits.value.length} visits.`,
+    })
+    selectedVisits.value = []
+    fetchVisits()
+  }
 }
 
 const bulkExportCsv = () => {

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
+import { toast } from 'vue-sonner'
 
 const { client } = useSupabase()
 
@@ -10,15 +11,21 @@ const userCursorSyncId = ref('')
 const handleRepairAction = async (actionName: string, actionFn: () => Promise<void>) => {
   const confirmText = prompt(`Type REPAIR to confirm ${actionName}:`)
   if (confirmText !== 'REPAIR') {
-    alert('Confirmation failed. Action cancelled.')
+    toast.warning('Action Cancelled', {
+      description: 'You did not type REPAIR correctly.',
+    })
     return
   }
   
   try {
     await actionFn()
-    alert(`${actionName} completed successfully.`)
+    toast.success('Action Successful', {
+      description: `${actionName} completed successfully.`,
+    })
   } catch (e: any) {
-    alert(`Error: ${e.message}`)
+    toast.error('Action Failed', {
+      description: e.message || 'An error occurred during repair.',
+    })
   }
 }
 
@@ -45,7 +52,9 @@ const resetSyncCursor = () => handleRepairAction('Reset user sync cursor', async
   if (!userCursorSyncId.value) throw new Error("User ID is required")
   // Delete the sync cursor record or update last_synced_at = null
   // We can just update their profile's last_sync_at (assuming it exists, or handle in drift)
-  alert('Sync cursor reset triggered.')
+  toast.info('Sync Cursor Reset', {
+    description: 'Sync cursor reset triggered for user ' + userCursorSyncId.value,
+  })
 })
 
 const regenerateViews = () => handleRepairAction('Regenerate Materialized Views', async () => {

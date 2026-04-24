@@ -25,16 +25,16 @@ CREATE POLICY "Users can view their own feedback" ON public.feedback_reports
 CREATE POLICY "Admins can view all feedback" ON public.feedback_reports
     FOR SELECT USING (
         EXISTS (
-            SELECT 1 FROM public.users
-            WHERE users.id = auth.uid() AND users.role = 'admin'
+            SELECT 1 FROM public.profiles
+            WHERE profiles.id = auth.uid() AND profiles.role IN ('admin', 'super_admin')
         )
     );
 
 CREATE POLICY "Admins can update feedback status" ON public.feedback_reports
     FOR UPDATE USING (
         EXISTS (
-            SELECT 1 FROM public.users
-            WHERE users.id = auth.uid() AND users.role = 'admin'
+            SELECT 1 FROM public.profiles
+            WHERE profiles.id = auth.uid() AND profiles.role IN ('admin', 'super_admin')
         )
     );
 
@@ -42,9 +42,9 @@ CREATE POLICY "Admins can update feedback status" ON public.feedback_reports
 CREATE TRIGGER handle_updated_at_feedback_reports
     BEFORE UPDATE ON public.feedback_reports
     FOR EACH ROW
-    EXECUTE FUNCTION public.handle_updated_at();
+    EXECUTE FUNCTION public.touch_updated_at();
 
 -- Add to audit log trigger
 CREATE TRIGGER audit_feedback_reports_changes
     AFTER INSERT OR UPDATE OR DELETE ON public.feedback_reports
-    FOR EACH ROW EXECUTE FUNCTION public.audit_log_changes();
+    FOR EACH ROW EXECUTE FUNCTION public.audit_trigger();

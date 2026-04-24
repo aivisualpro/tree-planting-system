@@ -155,6 +155,7 @@ export default defineNuxtConfig({
     headers: {
       contentSecurityPolicy: {
         'default-src': ["'self'"],
+        'connect-src': ["'self'", 'http://127.0.0.1:54321', 'ws://127.0.0.1:54321', 'http://localhost:54321', 'ws://localhost:54321', 'https://*.supabase.co', 'wss://*.supabase.co'],
         'base-uri': ["'self'"],
         'font-src': ["'self'", 'https:', 'data:'],
         'form-action': ["'self'"],

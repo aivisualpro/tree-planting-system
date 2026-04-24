@@ -123,17 +123,17 @@ RETURNS TRIGGER AS $$
 DECLARE
     coordinator_id UUID;
 BEGIN
-    -- visit.submitted
-    IF TG_TABLE_NAME = 'visits' AND TG_OP = 'INSERT' AND NEW.status = 'submitted' THEN
+    -- visit.completed
+    IF TG_TABLE_NAME = 'visits' AND TG_OP = 'INSERT' AND NEW.status = 'completed' THEN
         -- Find coordinator for the country
-        SELECT user_id INTO coordinator_id
+        SELECT id INTO coordinator_id
         FROM public.profiles
-        WHERE country = NEW.country AND role = 'coordinator'
+        WHERE NEW.country_id = ANY(assigned_countries) AND role = 'coordinator'
         LIMIT 1;
         
         IF coordinator_id IS NOT NULL THEN
             INSERT INTO public.notification_events (event_type, payload, recipient_user_id, channels)
-            VALUES ('visit.submitted', jsonb_build_object('visit_id', NEW.id, 'country', NEW.country), coordinator_id, ARRAY['push']);
+            VALUES ('visit.submitted', jsonb_build_object('visit_id', NEW.id, 'country_id', NEW.country_id), coordinator_id, ARRAY['push']);
         END IF;
     END IF;
     

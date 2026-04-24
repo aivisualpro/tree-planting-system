@@ -3,8 +3,6 @@ INSERT INTO storage.buckets (id, name, public)
 VALUES ('visit-media', 'visit-media', false)
 ON CONFLICT (id) DO NOTHING;
 
--- Enable RLS
-ALTER TABLE storage.objects ENABLE ROW LEVEL SECURITY;
 
 -- Drop existing policies if they exist (idempotent)
 DROP POLICY IF EXISTS "Insert media policy" ON storage.objects;
