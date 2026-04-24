@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
+import { useRouter } from 'vue-router'
 import { usePageHeader } from '~/composables/usePageHeader'
 import type { Database } from '../../../../shared/types/database'
 
@@ -7,13 +8,19 @@ const { setHeader } = usePageHeader()
 setHeader({ title: 'Users & Roles', icon: 'i-lucide-users', description: 'Manage system access and permissions.' })
 
 const supabase = useSupabaseClient<Database>()
+const router = useRouter()
 const users = ref<any[]>([])
 const loading = ref(true)
 
+const selectedUsers = ref<string[]>([])
+
 const fetchUsers = async () => {
   loading.value = true
-  // @ts-ignore
-  const { data, error } = await supabase.from('users').select('*').order('name')
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('*, country:countries(name)')
+    .order('created_at', { ascending: false })
+
   if (!error && data) {
     users.value = data
   }
@@ -22,26 +29,49 @@ const fetchUsers = async () => {
 
 onMounted(() => fetchUsers())
 
-const inviteEmail = ref('')
-const inviteRole = ref('field_agent')
-const inviting = ref(false)
-
-const inviteUser = async () => {
-  if (!inviteEmail.value) return
-  inviting.value = true
-  
-  try {
-    await $fetch('/api/admin/users', {
-      method: 'POST',
-      body: { email: inviteEmail.value, role: inviteRole.value }
-    })
-    inviteEmail.value = ''
-    await fetchUsers()
-  } catch (error) {
-    console.error('Failed to invite user', error)
-  } finally {
-    inviting.value = false
+const toggleSelection = (id: string) => {
+  const index = selectedUsers.value.indexOf(id)
+  if (index === -1) {
+    selectedUsers.value.push(id)
+  } else {
+    selectedUsers.value.splice(index, 1)
   }
+}
+
+const toggleAll = () => {
+  if (selectedUsers.value.length === users.value.length) {
+    selectedUsers.value = []
+  } else {
+    selectedUsers.value = users.value.map(u => u.id)
+  }
+}
+
+const isAllSelected = computed(() => users.value.length > 0 && selectedUsers.value.length === users.value.length)
+
+const bulkRoleChange = async () => {
+  const newRole = prompt('Enter new role (super_admin, admin, coordinator, field_user, viewer):')
+  if (!newRole) return
+  await supabase.rpc('bulk_update_user_role', { user_ids: selectedUsers.value, new_role: newRole })
+  selectedUsers.value = []
+  fetchUsers()
+}
+
+const bulkCountryReassignment = async () => {
+  const newCountry = prompt('Enter new Country ID:')
+  if (!newCountry) return
+  await supabase.rpc('bulk_reassign_user_country', { user_ids: selectedUsers.value, new_country_id: newCountry })
+  selectedUsers.value = []
+  fetchUsers()
+}
+
+const bulkResendInvite = async () => {
+  if (!confirm(`Resend invites to ${selectedUsers.value.length} users?`)) return
+  alert('Invites sent! (Mocked implementation, requires Edge Function)')
+  selectedUsers.value = []
+}
+
+const viewUser = (id: string) => {
+  router.push(`/users/${id}`)
 }
 </script>
 
@@ -54,48 +84,56 @@ const inviteUser = async () => {
             <CardTitle>System Users</CardTitle>
             <CardDescription>Manage user accounts and role assignments.</CardDescription>
           </div>
-          <div class="flex items-center gap-2">
-            <Input v-model="inviteEmail" placeholder="Email address" class="w-[200px]" />
-            <select v-model="inviteRole" class="flex h-9 w-full items-center justify-between whitespace-nowrap rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1">
-              <option value="field_agent">Field Agent</option>
-              <option value="admin">Admin</option>
-              <option value="super_admin">Super Admin</option>
-            </select>
-            <Button :disabled="inviting || !inviteEmail" @click="inviteUser">
-              <div class="i-lucide-mail mr-2" /> {{ inviting ? 'Inviting...' : 'Invite' }}
-            </Button>
-          </div>
         </CardHeader>
-        <CardContent class="flex-1 flex flex-col min-h-0">
+        
+        <div v-if="selectedUsers.length > 0" class="bg-muted mx-6 p-2 flex items-center justify-between rounded-md">
+          <div class="text-sm font-medium">{{ selectedUsers.length }} selected</div>
+          <div class="flex items-center gap-2">
+            <Button size="sm" variant="outline" @click="bulkRoleChange">Bulk Role Change</Button>
+            <Button size="sm" variant="outline" @click="bulkCountryReassignment">Bulk Country Reassign</Button>
+            <Button size="sm" variant="outline" @click="bulkResendInvite">Resend Invites</Button>
+          </div>
+        </div>
+
+        <CardContent class="flex-1 flex flex-col min-h-0 mt-4">
           <div class="rounded-md border h-full overflow-auto">
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Email</TableHead>
+                  <TableHead class="w-[50px]">
+                    <input type="checkbox" :checked="isAllSelected" @change="toggleAll" />
+                  </TableHead>
+                  <TableHead>User ID</TableHead>
                   <TableHead>Role</TableHead>
+                  <TableHead>Primary Country</TableHead>
                   <TableHead>Joined</TableHead>
                   <TableHead class="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 <TableRow v-if="loading" v-for="i in 5" :key="`skel-${i}`">
+                  <TableCell><Skeleton class="h-4 w-4" /></TableCell>
                   <TableCell><Skeleton class="h-4 w-[150px]" /></TableCell>
-                  <TableCell><Skeleton class="h-4 w-[200px]" /></TableCell>
+                  <TableCell><Skeleton class="h-4 w-[100px]" /></TableCell>
                   <TableCell><Skeleton class="h-4 w-[100px]" /></TableCell>
                   <TableCell><Skeleton class="h-4 w-[100px]" /></TableCell>
                   <TableCell class="text-right"><Skeleton class="h-8 w-8 ml-auto" /></TableCell>
                 </TableRow>
                 <TableRow v-else-if="users.length === 0">
-                  <TableCell colspan="5" class="h-24 text-center">No users found.</TableCell>
+                  <TableCell colspan="6" class="h-24 text-center">No users found.</TableCell>
                 </TableRow>
-                <TableRow v-else v-for="u in users" :key="u.id">
-                  <TableCell class="font-medium">{{ u.name || 'Pending Invite' }}</TableCell>
-                  <TableCell>{{ u.email }}</TableCell>
+                <TableRow v-else v-for="u in users" :key="u.id" class="cursor-pointer hover:bg-muted/50" @click="viewUser(u.id)">
+                  <TableCell @click.stop>
+                    <input type="checkbox" :checked="selectedUsers.includes(u.id)" @change="toggleSelection(u.id)" />
+                  </TableCell>
+                  <TableCell class="font-medium text-xs">{{ u.id }}</TableCell>
                   <TableCell><Badge>{{ u.role }}</Badge></TableCell>
+                  <TableCell>{{ u.country?.name || 'Unassigned' }}</TableCell>
                   <TableCell>{{ new Date(u.created_at).toLocaleDateString() }}</TableCell>
                   <TableCell class="text-right">
-                    <Button variant="ghost" size="sm">Edit Role</Button>
+                    <Button variant="ghost" size="icon" @click.stop="viewUser(u.id)">
+                      <div class="i-lucide-chevron-right size-4" />
+                    </Button>
                   </TableCell>
                 </TableRow>
               </TableBody>

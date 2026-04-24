@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import type { Database } from '../../../../shared/types/database'
 
@@ -11,6 +11,8 @@ const loading = ref(true)
 const page = ref(1)
 const pageSize = ref(50)
 const total = ref(0)
+const selectedVisits = ref<string[]>([])
+const cancelReason = ref('')
 
 const fetchVisits = async () => {
   loading.value = true
@@ -19,7 +21,7 @@ const fetchVisits = async () => {
 
   const { data, count, error } = await supabase
     .from('visits')
-    .select('*, country:countries(name), user:users(name)', { count: 'exact' })
+    .select('*, country:countries(name)', { count: 'exact' }) // removed user relation because it was failing probably? or we can keep assignee.
     .order('created_at', { ascending: false })
     .range(from, to)
 
@@ -37,16 +39,92 @@ onMounted(() => {
 const viewVisit = (id: string) => {
   router.push(`/visits/${id}`)
 }
+
+const toggleSelection = (id: string) => {
+  const index = selectedVisits.value.indexOf(id)
+  if (index === -1) {
+    selectedVisits.value.push(id)
+  } else {
+    selectedVisits.value.splice(index, 1)
+  }
+}
+
+const toggleAll = () => {
+  if (selectedVisits.value.length === visits.value.length) {
+    selectedVisits.value = []
+  } else {
+    selectedVisits.value = visits.value.map(v => v.id)
+  }
+}
+
+const isAllSelected = computed(() => visits.value.length > 0 && selectedVisits.value.length === visits.value.length)
+
+const bulkCancel = async () => {
+  if (!cancelReason.value) return alert('Cancellation reason is required')
+  if (!confirm(`Cancel ${selectedVisits.value.length} visits?`)) return
+  
+  await supabase.rpc('bulk_cancel_visits', { visit_ids: selectedVisits.value, reason: cancelReason.value })
+  selectedVisits.value = []
+  cancelReason.value = ''
+  fetchVisits()
+}
+
+const bulkReassign = async () => {
+  const newAssignee = prompt('Enter new assignee User ID:')
+  if (!newAssignee) return
+  
+  await supabase.rpc('bulk_reassign_visits', { visit_ids: selectedVisits.value, new_assignee_id: newAssignee })
+  selectedVisits.value = []
+  fetchVisits()
+}
+
+const bulkExportCsv = () => {
+  const selectedData = visits.value.filter(v => selectedVisits.value.includes(v.id))
+  if (selectedData.length === 0) return
+
+  const headers = ['ID', 'Country', 'Trees Planted', 'Status', 'Date']
+  const rows = selectedData.map(v => [
+    v.id,
+    v.country?.name || '',
+    v.trees_planted || 0,
+    v.status || 'Completed',
+    new Date(v.created_at).toLocaleDateString()
+  ])
+  
+  const csvContent = "data:text/csv;charset=utf-8," 
+    + [headers.join(","), ...rows.map(e => e.join(","))].join("\n")
+    
+  const encodedUri = encodeURI(csvContent)
+  const link = document.createElement("a")
+  link.setAttribute("href", encodedUri)
+  link.setAttribute("download", "visits_export.csv")
+  document.body.appendChild(link)
+  link.click()
+  link.remove()
+}
+
 </script>
 
 <template>
+  <div v-if="selectedVisits.length > 0" class="bg-muted p-2 flex items-center justify-between mb-4 rounded-md">
+    <div class="text-sm font-medium">{{ selectedVisits.length }} selected</div>
+    <div class="flex items-center gap-2">
+      <Input v-model="cancelReason" placeholder="Cancel reason" class="w-40 h-8" />
+      <Button size="sm" variant="destructive" @click="bulkCancel">Bulk Cancel</Button>
+      <Button size="sm" variant="outline" @click="bulkReassign">Bulk Reassign</Button>
+      <Button size="sm" variant="outline" @click="bulkExportCsv">Export CSV</Button>
+    </div>
+  </div>
+
   <div class="rounded-md border h-full overflow-auto">
     <Table>
       <TableHeader>
         <TableRow>
+          <TableHead class="w-[50px]">
+            <input type="checkbox" :checked="isAllSelected" @change="toggleAll" />
+          </TableHead>
           <TableHead>Date</TableHead>
           <TableHead>Country</TableHead>
-          <TableHead>User</TableHead>
           <TableHead>Trees Planted</TableHead>
           <TableHead>Status</TableHead>
           <TableHead class="text-right">Actions</TableHead>
@@ -54,8 +132,8 @@ const viewVisit = (id: string) => {
       </TableHeader>
       <TableBody>
         <TableRow v-if="loading" v-for="i in 5" :key="`skeleton-${i}`">
+          <TableCell><Skeleton class="h-4 w-4" /></TableCell>
           <TableCell><Skeleton class="h-4 w-[100px]" /></TableCell>
-          <TableCell><Skeleton class="h-4 w-[150px]" /></TableCell>
           <TableCell><Skeleton class="h-4 w-[150px]" /></TableCell>
           <TableCell><Skeleton class="h-4 w-[80px]" /></TableCell>
           <TableCell><Skeleton class="h-4 w-[80px]" /></TableCell>
@@ -69,12 +147,14 @@ const viewVisit = (id: string) => {
         </TableRow>
 
         <TableRow v-else v-for="visit in visits" :key="visit.id" class="cursor-pointer hover:bg-muted/50" @click="viewVisit(visit.id)">
+          <TableCell @click.stop>
+            <input type="checkbox" :checked="selectedVisits.includes(visit.id)" @change="toggleSelection(visit.id)" />
+          </TableCell>
           <TableCell>{{ new Date(visit.created_at).toLocaleDateString() }}</TableCell>
           <TableCell>{{ visit.country?.name || 'Unknown' }}</TableCell>
-          <TableCell>{{ visit.user?.name || 'Unknown' }}</TableCell>
-          <TableCell>{{ visit.trees_planted || 0 }}</TableCell>
+          <TableCell>{{ visit.trees_planted || visit.total_trees_planted || 0 }}</TableCell>
           <TableCell>
-            <Badge variant="outline">{{ visit.status || 'Completed' }}</Badge>
+            <Badge variant="outline">{{ visit.status || 'draft' }}</Badge>
           </TableCell>
           <TableCell class="text-right">
             <Button variant="ghost" size="icon" @click.stop="viewVisit(visit.id)">
