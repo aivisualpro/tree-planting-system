@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { onMounted, ref } from 'vue'
 
 const { client } = useSupabase()
 const loading = ref(true)
@@ -8,10 +8,10 @@ const report = ref<any>({
   missing_photos: [],
   zero_trees: [],
   inactive_users: [],
-  duplicates: []
+  duplicates: [],
 })
 
-const fetchReport = async () => {
+async function fetchReport() {
   loading.value = true
   const { data, error } = await client.rpc('admin_data_quality_report')
   if (!error && data) {
@@ -22,7 +22,7 @@ const fetchReport = async () => {
 
 onMounted(() => fetchReport())
 
-const viewDetails = (type: string) => {
+function viewDetails(type: string) {
   alert(`Investigating ${type}... (mock navigation)`)
 }
 </script>
@@ -45,7 +45,9 @@ const viewDetails = (type: string) => {
           <CardDescription>Visits with missing mandatory FKs</CardDescription>
         </CardHeader>
         <CardContent>
-          <div class="text-3xl font-bold">{{ report.orphaned_visits.length }}</div>
+          <div class="text-3xl font-bold">
+            {{ report.orphaned_visits.length }}
+          </div>
         </CardContent>
       </Card>
 
@@ -58,7 +60,9 @@ const viewDetails = (type: string) => {
           <CardDescription>Completed visits lacking required media</CardDescription>
         </CardHeader>
         <CardContent>
-          <div class="text-3xl font-bold">{{ report.missing_photos.length }}</div>
+          <div class="text-3xl font-bold">
+            {{ report.missing_photos.length }}
+          </div>
         </CardContent>
       </Card>
 
@@ -71,7 +75,9 @@ const viewDetails = (type: string) => {
           <CardDescription>Completed visits with 0 trees (suspicious)</CardDescription>
         </CardHeader>
         <CardContent>
-          <div class="text-3xl font-bold">{{ report.zero_trees.length }}</div>
+          <div class="text-3xl font-bold">
+            {{ report.zero_trees.length }}
+          </div>
         </CardContent>
       </Card>
 
@@ -84,7 +90,9 @@ const viewDetails = (type: string) => {
           <CardDescription>Users with no activity in 30+ days</CardDescription>
         </CardHeader>
         <CardContent>
-          <div class="text-3xl font-bold">{{ report.inactive_users.length }}</div>
+          <div class="text-3xl font-bold">
+            {{ report.inactive_users.length }}
+          </div>
         </CardContent>
       </Card>
 
@@ -97,10 +105,12 @@ const viewDetails = (type: string) => {
           <CardDescription>Same GPS, Date, and User</CardDescription>
         </CardHeader>
         <CardContent>
-          <div class="text-3xl font-bold">{{ report.duplicates.length }}</div>
+          <div class="text-3xl font-bold">
+            {{ report.duplicates.length }}
+          </div>
         </CardContent>
       </Card>
-      
+
       <Card class="cursor-pointer hover:bg-muted/50 transition-colors" @click="viewDetails('missing_translations')">
         <CardHeader>
           <CardTitle class="flex items-center gap-2 text-blue-500">
@@ -110,7 +120,9 @@ const viewDetails = (type: string) => {
           <CardDescription>Entities missing translations for active locales</CardDescription>
         </CardHeader>
         <CardContent>
-          <div class="text-3xl font-bold">Check</div>
+          <div class="text-3xl font-bold">
+            Check
+          </div>
         </CardContent>
       </Card>
     </div>

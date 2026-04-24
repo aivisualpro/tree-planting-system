@@ -25,7 +25,7 @@ interface Message {
   type: 'text' | 'image' | 'file' | 'voice'
   fileName?: string
   fileSize?: string
-  replyTo?: { name: string; text: string }
+  replyTo?: { name: string, text: string }
   reactions?: string[]
 }
 
@@ -33,7 +33,7 @@ interface Message {
 const contacts = ref<Contact[]>([
   { id: 'c1', name: 'Costa Quinn', avatar: '/avatars/shadcn.png', role: 'Product Manager', online: true, lastMsg: 'Yes, you can!', lastMsgTime: '1m', unread: 0 },
   { id: 'c2', name: 'Rachel Doe', avatar: '', role: 'Developer', online: true, lastMsg: '📎 2. Using the static met…', lastMsgTime: '14m', unread: 3 },
-  { id: 'c3', name: 'Lewis Clarke', avatar: '', role: 'Designer', online: true, lastMsg: "💬 How's these all free? 😎", lastMsgTime: '15m', unread: 0 },
+  { id: 'c3', name: 'Lewis Clarke', avatar: '', role: 'Designer', online: true, lastMsg: '💬 How\'s these all free? 😎', lastMsgTime: '15m', unread: 0 },
   { id: 'c4', name: 'Technical Issues', avatar: '', role: 'Support Channel', online: false, lastMsg: 'Great! 👍', lastMsgTime: '55m', unread: 0 },
   { id: 'c5', name: 'Bob Dean', avatar: '', role: 'Client', online: false, lastMsg: '📎 Hey Preline team, I got a…', lastMsgTime: '41m', unread: 1 },
   { id: 'c6', name: 'Mark Colbert', avatar: '/avatars/adeel.png', role: 'Sales Lead', online: false, lastMsg: '🎤 Voice message', lastMsgTime: '50m', unread: 0 },
@@ -43,28 +43,28 @@ const contacts = ref<Contact[]>([
 
 const messages = ref<Record<string, Message[]>>({
   c1: [
-    { id: 'm1', contactId: 'c1', text: "Hey! I've been looking at the new dashboard design. Looks incredible! 🎨", time: '10:42 AM', fromMe: false, read: true, type: 'text' },
-    { id: 'm2', contactId: 'c1', text: "Thanks! We spent a lot of time on the glassmorphism effects and micro-animations.", time: '10:43 AM', fromMe: true, read: true, type: 'text' },
-    { id: 'm3', contactId: 'c1', text: "Can we add a dark mode toggle in the header?", time: '10:44 AM', fromMe: false, read: true, type: 'text' },
-    { id: 'm4', contactId: 'c1', text: "Already implemented! The color mode composable handles it with smooth CSS transitions. Check the top-right corner 🌙", time: '10:45 AM', fromMe: true, read: true, type: 'text' },
-    { id: 'm5', contactId: 'c1', text: "Perfect. One more thing — can we export the KPI charts as PDF?", time: '10:50 AM', fromMe: false, read: true, type: 'text' },
-    { id: 'm6', contactId: 'c1', text: "Yes, you can!", time: '10:51 AM', fromMe: true, read: true, type: 'text' },
+    { id: 'm1', contactId: 'c1', text: 'Hey! I\'ve been looking at the new dashboard design. Looks incredible! 🎨', time: '10:42 AM', fromMe: false, read: true, type: 'text' },
+    { id: 'm2', contactId: 'c1', text: 'Thanks! We spent a lot of time on the glassmorphism effects and micro-animations.', time: '10:43 AM', fromMe: true, read: true, type: 'text' },
+    { id: 'm3', contactId: 'c1', text: 'Can we add a dark mode toggle in the header?', time: '10:44 AM', fromMe: false, read: true, type: 'text' },
+    { id: 'm4', contactId: 'c1', text: 'Already implemented! The color mode composable handles it with smooth CSS transitions. Check the top-right corner 🌙', time: '10:45 AM', fromMe: true, read: true, type: 'text' },
+    { id: 'm5', contactId: 'c1', text: 'Perfect. One more thing — can we export the KPI charts as PDF?', time: '10:50 AM', fromMe: false, read: true, type: 'text' },
+    { id: 'm6', contactId: 'c1', text: 'Yes, you can!', time: '10:51 AM', fromMe: true, read: true, type: 'text' },
   ],
   c2: [
-    { id: 'm7', contactId: 'c2', text: "I've been working on the API integration. Getting a CORS error on the staging server.", time: '9:30 AM', fromMe: false, read: true, type: 'text' },
-    { id: 'm8', contactId: 'c2', text: "Are you using the correct origin header? Let me check the Vercel config.", time: '9:32 AM', fromMe: true, read: true, type: 'text' },
-    { id: 'm9', contactId: 'c2', text: "Found it — the allowedOrigins array was missing the staging domain.", time: '9:35 AM', fromMe: true, read: true, type: 'text' },
-    { id: 'm10', contactId: 'c2', text: "Here's the fix I deployed:", time: '9:36 AM', fromMe: true, read: true, type: 'text' },
-    { id: 'm11', contactId: 'c2', text: "api-config-fix.patch", time: '9:36 AM', fromMe: true, read: false, type: 'file', fileName: 'api-config-fix.patch', fileSize: '2.4 KB' },
-    { id: 'm12', contactId: 'c2', text: "2. Using the static method instead of the instance method resolved the hydration mismatch too.", time: '9:40 AM', fromMe: false, read: false, type: 'text' },
+    { id: 'm7', contactId: 'c2', text: 'I\'ve been working on the API integration. Getting a CORS error on the staging server.', time: '9:30 AM', fromMe: false, read: true, type: 'text' },
+    { id: 'm8', contactId: 'c2', text: 'Are you using the correct origin header? Let me check the Vercel config.', time: '9:32 AM', fromMe: true, read: true, type: 'text' },
+    { id: 'm9', contactId: 'c2', text: 'Found it — the allowedOrigins array was missing the staging domain.', time: '9:35 AM', fromMe: true, read: true, type: 'text' },
+    { id: 'm10', contactId: 'c2', text: 'Here\'s the fix I deployed:', time: '9:36 AM', fromMe: true, read: true, type: 'text' },
+    { id: 'm11', contactId: 'c2', text: 'api-config-fix.patch', time: '9:36 AM', fromMe: true, read: false, type: 'file', fileName: 'api-config-fix.patch', fileSize: '2.4 KB' },
+    { id: 'm12', contactId: 'c2', text: '2. Using the static method instead of the instance method resolved the hydration mismatch too.', time: '9:40 AM', fromMe: false, read: false, type: 'text' },
   ],
   c3: [
-    { id: 'm13', contactId: 'c3', text: "This boilerplate is amazing! How's everything free? 😎", time: '9:10 AM', fromMe: false, read: true, type: 'text' },
-    { id: 'm14', contactId: 'c3', text: "Open source at its finest! We believe in community-driven development 🚀", time: '9:12 AM', fromMe: true, read: true, type: 'text' },
+    { id: 'm13', contactId: 'c3', text: 'This boilerplate is amazing! How\'s everything free? 😎', time: '9:10 AM', fromMe: false, read: true, type: 'text' },
+    { id: 'm14', contactId: 'c3', text: 'Open source at its finest! We believe in community-driven development 🚀', time: '9:12 AM', fromMe: true, read: true, type: 'text' },
   ],
   c5: [
-    { id: 'm15', contactId: 'c5', text: "Hey Preline team, I got a question about the enterprise tier.", time: '10:05 AM', fromMe: false, read: false, type: 'text', replyTo: undefined },
-    { id: 'm16', contactId: 'c5', text: "Does it include custom branding for the login page?", time: '10:06 AM', fromMe: false, read: false, type: 'text' },
+    { id: 'm15', contactId: 'c5', text: 'Hey Preline team, I got a question about the enterprise tier.', time: '10:05 AM', fromMe: false, read: false, type: 'text', replyTo: undefined },
+    { id: 'm16', contactId: 'c5', text: 'Does it include custom branding for the login page?', time: '10:06 AM', fromMe: false, read: false, type: 'text' },
   ],
 })
 
@@ -92,12 +92,14 @@ function selectContact(id: string) {
   activeContactId.value = id
   // Clear unread
   const c = contacts.value.find(c => c.id === id)
-  if (c) c.unread = 0
+  if (c)
+    c.unread = 0
   nextTick(() => scrollToBottom())
 }
 
 function sendMessage() {
-  if (!messageInput.value.trim()) return
+  if (!messageInput.value.trim())
+    return
   const now = new Date()
   const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
   const msg: Message = {
@@ -133,11 +135,11 @@ function sendMessage() {
     setTimeout(() => {
       c.typing = false
       const replies = [
-        "Got it, I'll look into that! 👍",
-        "Makes sense. Let me check on my end.",
-        "That's a great point, thanks for sharing!",
-        "Working on it now 🔧",
-        "Sounds good to me!",
+        'Got it, I\'ll look into that! 👍',
+        'Makes sense. Let me check on my end.',
+        'That\'s a great point, thanks for sharing!',
+        'Working on it now 🔧',
+        'Sounds good to me!',
       ]
       const reply: Message = {
         id: `m-${Date.now() + 1}`,
@@ -169,8 +171,14 @@ function getInitials(name: string) {
 }
 
 const avatarColors = [
-  'bg-violet-500', 'bg-sky-500', 'bg-emerald-500', 'bg-amber-500',
-  'bg-rose-500', 'bg-indigo-500', 'bg-teal-500', 'bg-pink-500',
+  'bg-violet-500',
+  'bg-sky-500',
+  'bg-emerald-500',
+  'bg-amber-500',
+  'bg-rose-500',
+  'bg-indigo-500',
+  'bg-teal-500',
+  'bg-pink-500',
 ]
 
 function getAvatarColor(id: string) {
@@ -184,7 +192,6 @@ onMounted(() => scrollToBottom())
 
 <template>
   <div class="flex h-[calc(100dvh-54px-3rem)] overflow-hidden rounded-xl border border-border/50 bg-background">
-
     <!-- ═══════════ LEFT SIDEBAR ═══════════ -->
     <div class="w-[320px] shrink-0 border-r border-border/50 flex flex-col bg-card/40">
       <!-- Search -->
@@ -291,7 +298,9 @@ onMounted(() => scrollToBottom())
             />
           </div>
           <div>
-            <h3 class="text-sm font-semibold leading-tight">{{ activeContact.name }}</h3>
+            <h3 class="text-sm font-semibold leading-tight">
+              {{ activeContact.name }}
+            </h3>
             <p class="text-[11px] text-muted-foreground">
               <template v-if="activeContact.typing">
                 <span class="text-primary font-medium">typing<span class="typing-dots">...</span></span>
@@ -372,8 +381,12 @@ onMounted(() => scrollToBottom())
             >
               <!-- Reply preview -->
               <div v-if="msg.replyTo" class="mb-1 ml-1 pl-2 border-l-2 border-primary/40 rounded-sm">
-                <p class="text-[10px] font-semibold text-primary/80">Reply to {{ msg.replyTo.name }}</p>
-                <p class="text-[10px] text-muted-foreground truncate">{{ msg.replyTo.text }}</p>
+                <p class="text-[10px] font-semibold text-primary/80">
+                  Reply to {{ msg.replyTo.name }}
+                </p>
+                <p class="text-[10px] text-muted-foreground truncate">
+                  {{ msg.replyTo.text }}
+                </p>
               </div>
 
               <div
@@ -391,8 +404,12 @@ onMounted(() => scrollToBottom())
                     <Icon name="lucide:file-text" class="size-4" :class="msg.fromMe ? 'text-primary-foreground' : 'text-primary'" />
                   </div>
                   <div>
-                    <p class="text-xs font-medium">{{ msg.fileName }}</p>
-                    <p class="text-[10px] opacity-70">{{ msg.fileSize }}</p>
+                    <p class="text-xs font-medium">
+                      {{ msg.fileName }}
+                    </p>
+                    <p class="text-[10px] opacity-70">
+                      {{ msg.fileSize }}
+                    </p>
                   </div>
                   <Button
                     variant="ghost"
@@ -480,11 +497,15 @@ onMounted(() => scrollToBottom())
       <!-- Message Input -->
       <div class="px-4 py-3 border-t border-border/50 bg-card/30 backdrop-blur-sm">
         <!-- Reply preview (static demo) -->
-        <div class="flex items-center justify-between gap-3 mb-2" v-if="false">
+        <div v-if="false" class="flex items-center justify-between gap-3 mb-2">
           <div class="flex items-center gap-2 pl-3 border-l-2 border-primary">
             <div>
-              <p class="text-[11px] font-semibold text-primary">Reply to Alex</p>
-              <p class="text-[11px] text-muted-foreground truncate">I love Preline Pro!</p>
+              <p class="text-[11px] font-semibold text-primary">
+                Reply to Alex
+              </p>
+              <p class="text-[11px] text-muted-foreground truncate">
+                I love Preline Pro!
+              </p>
             </div>
           </div>
           <Button variant="ghost" size="icon" class="size-6">

@@ -1,23 +1,23 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import VChart from 'vue-echarts'
+import { LineChart } from 'echarts/charts'
+import { GridComponent, LegendComponent, TooltipComponent } from 'echarts/components'
 import { use } from 'echarts/core'
 import { CanvasRenderer } from 'echarts/renderers'
-import { LineChart } from 'echarts/charts'
-import { GridComponent, TooltipComponent, LegendComponent } from 'echarts/components'
-
-use([CanvasRenderer, LineChart, GridComponent, TooltipComponent, LegendComponent])
+import { ref } from 'vue'
+import VChart from 'vue-echarts'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
 const props = defineProps<{
   data: any[]
 }>()
 
+use([CanvasRenderer, LineChart, GridComponent, TooltipComponent, LegendComponent])
+
 const option = computed(() => ({
   tooltip: { trigger: 'axis' },
-  xAxis: { 
-    type: 'category', 
-    data: props.data ? props.data.map((d: any) => d.date) : [] 
+  xAxis: {
+    type: 'category',
+    data: props.data ? props.data.map((d: any) => d.date) : [],
   },
   yAxis: { type: 'value' },
   series: [
@@ -25,9 +25,9 @@ const option = computed(() => ({
       data: props.data ? props.data.map((d: any) => d.trees) : [],
       type: 'line',
       smooth: true,
-      itemStyle: { color: '#16a34a' }
-    }
-  ]
+      itemStyle: { color: '#16a34a' },
+    },
+  ],
 }))
 </script>
 

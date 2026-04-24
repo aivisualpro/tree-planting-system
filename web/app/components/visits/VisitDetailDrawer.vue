@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
+import { Button } from '@/components/ui/button'
 import {
   Drawer,
   DrawerClose,
@@ -9,7 +10,6 @@ import {
   DrawerHeader,
   DrawerTitle,
 } from '@/components/ui/drawer'
-import { Button } from '@/components/ui/button'
 
 const open = ref(false)
 const visitId = ref<string | null>(null)
@@ -22,7 +22,7 @@ defineExpose({
   open: (id: string) => {
     visitId.value = id
     open.value = true
-  }
+  },
 })
 </script>
 
@@ -40,7 +40,9 @@ defineExpose({
         <DrawerFooter>
           <Button>Edit Visit</Button>
           <DrawerClose as-child>
-            <Button variant="outline">Close</Button>
+            <Button variant="outline">
+              Close
+            </Button>
           </DrawerClose>
         </DrawerFooter>
       </div>

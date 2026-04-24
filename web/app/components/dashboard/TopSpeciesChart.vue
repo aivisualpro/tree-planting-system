@@ -1,17 +1,17 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import VChart from 'vue-echarts'
-import { use } from 'echarts/core'
-import { CanvasRenderer } from 'echarts/renderers'
 import { BarChart } from 'echarts/charts'
 import { GridComponent, TooltipComponent } from 'echarts/components'
-
-use([CanvasRenderer, BarChart, GridComponent, TooltipComponent])
+import { use } from 'echarts/core'
+import { CanvasRenderer } from 'echarts/renderers'
+import { ref } from 'vue'
+import VChart from 'vue-echarts'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
 const props = defineProps<{
   data: any[]
 }>()
+
+use([CanvasRenderer, BarChart, GridComponent, TooltipComponent])
 
 const option = computed(() => ({
   tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
@@ -23,9 +23,9 @@ const option = computed(() => ({
       name: 'Planted',
       type: 'bar',
       data: props.data ? props.data.map((d: any) => d.total_planted) : [],
-      itemStyle: { color: '#16a34a' }
-    }
-  ]
+      itemStyle: { color: '#16a34a' },
+    },
+  ],
 }))
 </script>
 

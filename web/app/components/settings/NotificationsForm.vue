@@ -31,17 +31,19 @@ const { handleSubmit, setValues } = useForm({
 })
 
 onMounted(async () => {
-  if (!user.value) return
-  
+  if (!user.value)
+    return
+
   try {
     const { data, error } = await supabase
       .from('notification_preferences')
       .select('*')
       .eq('user_id', user.value.id)
       .single()
-      
-    if (error && error.code !== 'PGRST116') throw error
-    
+
+    if (error && error.code !== 'PGRST116')
+      throw error
+
     if (data) {
       setValues({
         push_enabled: data.push_enabled,
@@ -52,16 +54,19 @@ onMounted(async () => {
         timezone: data.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC',
       })
     }
-  } catch (e: any) {
+  }
+  catch (e: any) {
     toast.error('Failed to load preferences', { description: e.message })
-  } finally {
+  }
+  finally {
     isLoading.value = false
   }
 })
 
 const onSubmit = handleSubmit(async (values) => {
-  if (!user.value) return
-  
+  if (!user.value)
+    return
+
   try {
     const { error } = await supabase
       .from('notification_preferences')
@@ -73,13 +78,15 @@ const onSubmit = handleSubmit(async (values) => {
         quiet_hours_start: values.quiet_hours_start || null,
         quiet_hours_end: values.quiet_hours_end || null,
         timezone: values.timezone,
-        updated_at: new Date().toISOString()
+        updated_at: new Date().toISOString(),
       })
-      
-    if (error) throw error
-    
+
+    if (error)
+      throw error
+
     toast.success('Preferences updated successfully.')
-  } catch (e: any) {
+  }
+  catch (e: any) {
     toast.error('Failed to update preferences', { description: e.message })
   }
 })
@@ -108,7 +115,9 @@ const onSubmit = handleSubmit(async (values) => {
           <FormField v-slot="{ handleChange, value }" type="checkbox" name="push_enabled">
             <FormItem class="flex flex-row items-center justify-between border rounded-lg p-4">
               <div class="space-y-0.5">
-                <FormLabel class="text-base">Push Notifications</FormLabel>
+                <FormLabel class="text-base">
+                  Push Notifications
+                </FormLabel>
                 <FormDescription>Receive push alerts on your mobile and web devices.</FormDescription>
               </div>
               <FormControl>
@@ -120,7 +129,9 @@ const onSubmit = handleSubmit(async (values) => {
           <FormField v-slot="{ handleChange, value }" type="checkbox" name="email_enabled">
             <FormItem class="flex flex-row items-center justify-between border rounded-lg p-4">
               <div class="space-y-0.5">
-                <FormLabel class="text-base">Email Notifications</FormLabel>
+                <FormLabel class="text-base">
+                  Email Notifications
+                </FormLabel>
                 <FormDescription>Receive updates via email.</FormDescription>
               </div>
               <FormControl>
@@ -132,7 +143,9 @@ const onSubmit = handleSubmit(async (values) => {
           <FormField v-slot="{ handleChange, value }" type="checkbox" name="whatsapp_enabled">
             <FormItem class="flex flex-row items-center justify-between border rounded-lg p-4">
               <div class="space-y-0.5">
-                <FormLabel class="text-base">WhatsApp Notifications</FormLabel>
+                <FormLabel class="text-base">
+                  WhatsApp Notifications
+                </FormLabel>
                 <FormDescription>Receive critical alerts via WhatsApp.</FormDescription>
               </div>
               <FormControl>

@@ -1,3 +1,10 @@
+<script setup lang="ts">
+definePageMeta({
+  layout: 'blank',
+  auth: false,
+})
+</script>
+
 <template>
   <div class="max-w-4xl mx-auto p-8 prose dark:prose-invert">
     <h1>Privacy Policy</h1>
@@ -57,10 +64,3 @@
     <p>If you have any questions or wish to exercise your rights, please contact our Data Protection Officer (DPO) at compliance@example.org.</p>
   </div>
 </template>
-
-<script setup lang="ts">
-definePageMeta({
-  layout: 'blank',
-  auth: false,
-})
-</script>

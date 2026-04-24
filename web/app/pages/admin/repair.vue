@@ -8,7 +8,7 @@ const visitIdInput = ref('')
 const userDraftSyncId = ref('')
 const userCursorSyncId = ref('')
 
-const handleRepairAction = async (actionName: string, actionFn: () => Promise<void>) => {
+async function handleRepairAction(actionName: string, actionFn: () => Promise<void>) {
   const confirmText = prompt(`Type REPAIR to confirm ${actionName}:`)
   if (confirmText !== 'REPAIR') {
     toast.warning('Action Cancelled', {
@@ -16,50 +16,65 @@ const handleRepairAction = async (actionName: string, actionFn: () => Promise<vo
     })
     return
   }
-  
+
   try {
     await actionFn()
     toast.success('Action Successful', {
       description: `${actionName} completed successfully.`,
     })
-  } catch (e: any) {
+  }
+  catch (e: any) {
     toast.error('Action Failed', {
       description: e.message || 'An error occurred during repair.',
     })
   }
 }
 
-const softDeleteVisit = () => handleRepairAction('Soft-delete visit', async () => {
-  if (!visitIdInput.value) throw new Error("Visit ID is required")
-  await client.rpc('admin_soft_delete_visit', { target_visit_id: visitIdInput.value })
-})
-
-const restoreVisit = () => handleRepairAction('Restore visit', async () => {
-  if (!visitIdInput.value) throw new Error("Visit ID is required")
-  await client.rpc('admin_restore_visit', { target_visit_id: visitIdInput.value })
-})
-
-const resyncDrafts = () => handleRepairAction('Re-sync user drafts', async () => {
-  if (!userDraftSyncId.value) throw new Error("User ID is required")
-  // Typically would call an edge function to send a push notification to force sync.
-  // For now, mock it or just call a dummy function
-  await client.functions.invoke('dispatch-notifications', {
-    body: { type: 'force_sync', user_id: userDraftSyncId.value }
+function softDeleteVisit() {
+  return handleRepairAction('Soft-delete visit', async () => {
+    if (!visitIdInput.value)
+      throw new Error('Visit ID is required')
+    await client.rpc('admin_soft_delete_visit', { target_visit_id: visitIdInput.value })
   })
-})
+}
 
-const resetSyncCursor = () => handleRepairAction('Reset user sync cursor', async () => {
-  if (!userCursorSyncId.value) throw new Error("User ID is required")
-  // Delete the sync cursor record or update last_synced_at = null
-  // We can just update their profile's last_sync_at (assuming it exists, or handle in drift)
-  toast.info('Sync Cursor Reset', {
-    description: 'Sync cursor reset triggered for user ' + userCursorSyncId.value,
+function restoreVisit() {
+  return handleRepairAction('Restore visit', async () => {
+    if (!visitIdInput.value)
+      throw new Error('Visit ID is required')
+    await client.rpc('admin_restore_visit', { target_visit_id: visitIdInput.value })
   })
-})
+}
 
-const regenerateViews = () => handleRepairAction('Regenerate Materialized Views', async () => {
-  await client.rpc('admin_refresh_materialized_views')
-})
+function resyncDrafts() {
+  return handleRepairAction('Re-sync user drafts', async () => {
+    if (!userDraftSyncId.value)
+      throw new Error('User ID is required')
+    // Typically would call an edge function to send a push notification to force sync.
+    // For now, mock it or just call a dummy function
+    await client.functions.invoke('dispatch-notifications', {
+      body: { type: 'force_sync', user_id: userDraftSyncId.value },
+    })
+  })
+}
+
+function resetSyncCursor() {
+  return handleRepairAction('Reset user sync cursor', async () => {
+    if (!userCursorSyncId.value)
+      throw new Error('User ID is required')
+    // Delete the sync cursor record or update last_synced_at = null
+    // We can just update their profile's last_sync_at (assuming it exists, or handle in drift)
+    toast.info('Sync Cursor Reset', {
+      description: `Sync cursor reset triggered for user ${userCursorSyncId.value}`,
+    })
+  })
+}
+
+function regenerateViews() {
+  return handleRepairAction('Regenerate Materialized Views', async () => {
+    await client.rpc('admin_refresh_materialized_views')
+  })
+}
 </script>
 
 <template>
@@ -75,8 +90,12 @@ const regenerateViews = () => handleRepairAction('Regenerate Materialized Views'
         <CardContent class="flex flex-col gap-4">
           <Input v-model="visitIdInput" placeholder="Visit UUID" />
           <div class="flex gap-2">
-            <Button variant="destructive" @click="softDeleteVisit">Soft-Delete</Button>
-            <Button variant="outline" @click="restoreVisit">Restore</Button>
+            <Button variant="destructive" @click="softDeleteVisit">
+              Soft-Delete
+            </Button>
+            <Button variant="outline" @click="restoreVisit">
+              Restore
+            </Button>
           </div>
         </CardContent>
       </Card>
@@ -89,11 +108,15 @@ const regenerateViews = () => handleRepairAction('Regenerate Materialized Views'
         <CardContent class="flex flex-col gap-4">
           <div class="flex gap-2">
             <Input v-model="userDraftSyncId" placeholder="User UUID" class="flex-1" />
-            <Button variant="outline" @click="resyncDrafts">Push Drafts</Button>
+            <Button variant="outline" @click="resyncDrafts">
+              Push Drafts
+            </Button>
           </div>
           <div class="flex gap-2">
             <Input v-model="userCursorSyncId" placeholder="User UUID" class="flex-1" />
-            <Button variant="outline" @click="resetSyncCursor">Reset Cursor</Button>
+            <Button variant="outline" @click="resetSyncCursor">
+              Reset Cursor
+            </Button>
           </div>
         </CardContent>
       </Card>
@@ -104,7 +127,9 @@ const regenerateViews = () => handleRepairAction('Regenerate Materialized Views'
           <CardDescription>Manually trigger a refresh of analytical views.</CardDescription>
         </CardHeader>
         <CardContent>
-          <Button variant="default" @click="regenerateViews">Regenerate Views</Button>
+          <Button variant="default" @click="regenerateViews">
+            Regenerate Views
+          </Button>
         </CardContent>
       </Card>
     </div>

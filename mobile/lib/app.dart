@@ -7,6 +7,8 @@ import 'core/notifications/notification_service.dart';
 
 import 'core/sync/sync_provider.dart';
 import 'features/settings/training_mode_provider.dart';
+import 'core/config/app_version_repository.dart';
+import 'core/config/feature_flags_repository.dart';
 
 class App extends ConsumerStatefulWidget {
   const App({super.key});
@@ -24,6 +26,8 @@ class _AppState extends ConsumerState<App> with WidgetsBindingObserver {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final router = ref.read(appRouterProvider);
       ref.read(notificationServiceProvider).setupInteractedMessage(router);
+      ref.read(appVersionProvider.notifier).checkVersion();
+      ref.read(featureFlagsProvider.notifier).refreshFlags();
     });
   }
 
@@ -37,6 +41,8 @@ class _AppState extends ConsumerState<App> with WidgetsBindingObserver {
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
       ref.read(syncEngineProvider).runSync();
+      ref.read(appVersionProvider.notifier).checkVersion();
+      ref.read(featureFlagsProvider.notifier).refreshFlags();
     }
   }
 
@@ -47,42 +53,44 @@ class _AppState extends ConsumerState<App> with WidgetsBindingObserver {
     // Placeholder until l10n is generated
     // final locale = ref.watch(localeProvider); 
 
-    return MaterialApp.router(
-      title: 'Tree Planting',
-      theme: AppTheme.lightTheme,
-      darkTheme: AppTheme.darkTheme,
-      themeMode: ThemeMode.system,
-      routerConfig: router,
-      builder: (context, child) {
-        if (!isTrainingMode) return child!;
-        return Directionality(
-          textDirection: TextDirection.ltr,
-          child: Column(
-            children: [
-              Container(
-                height: 40,
-                color: Colors.orange,
-                width: double.infinity,
-                alignment: Alignment.bottomCenter,
-                padding: const EdgeInsets.only(bottom: 4),
-                child: const Text(
-                  'TRAINING MODE',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 12,
-                    decoration: TextDecoration.none,
+    return VersionOverlay(
+      child: MaterialApp.router(
+        title: 'Tree Planting',
+        theme: AppTheme.lightTheme,
+        darkTheme: AppTheme.darkTheme,
+        themeMode: ThemeMode.system,
+        routerConfig: router,
+        builder: (context, child) {
+          if (!isTrainingMode) return child!;
+          return Directionality(
+            textDirection: TextDirection.ltr,
+            child: Column(
+              children: [
+                Container(
+                  height: 40,
+                  color: Colors.orange,
+                  width: double.infinity,
+                  alignment: Alignment.bottomCenter,
+                  padding: const EdgeInsets.only(bottom: 4),
+                  child: const Text(
+                    'TRAINING MODE',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 12,
+                      decoration: TextDecoration.none,
+                    ),
                   ),
                 ),
-              ),
-              Expanded(child: child!),
-            ],
-          ),
-        );
-      },
-      // localizationsDelegates: AppLocalizations.localizationsDelegates,
-      // supportedLocales: AppLocalizations.supportedLocales,
-      // locale: locale,
+                Expanded(child: child!),
+              ],
+            ),
+          );
+        },
+        // localizationsDelegates: AppLocalizations.localizationsDelegates,
+        // supportedLocales: AppLocalizations.supportedLocales,
+        // locale: locale,
+      ),
     );
   }
 }

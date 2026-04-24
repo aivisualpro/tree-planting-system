@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import NumberFlow from '@number-flow/vue'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
 
 defineProps<{
@@ -15,7 +15,9 @@ defineProps<{
 <template>
   <Card>
     <CardHeader class="flex flex-row items-center justify-between pb-2">
-      <CardTitle class="text-sm font-medium text-muted-foreground">{{ title }}</CardTitle>
+      <CardTitle class="text-sm font-medium text-muted-foreground">
+        {{ title }}
+      </CardTitle>
       <component :is="icon" v-if="icon" class="h-4 w-4 text-muted-foreground" />
     </CardHeader>
     <CardContent>

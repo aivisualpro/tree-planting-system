@@ -20,6 +20,6 @@ export const useFiltersStore = defineStore('filters', {
       this.dateRange = { start: null, end: null }
       this.selectedCountries = []
       this.selectedSpecies = []
-    }
-  }
+    },
+  },
 })

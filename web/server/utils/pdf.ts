@@ -1,27 +1,27 @@
-import puppeteer from 'puppeteer-core';
-import chromium from '@sparticuz/chromium';
+import chromium from '@sparticuz/chromium'
+import puppeteer from 'puppeteer-core'
 
 /**
  * Generates a PDF from HTML content using Puppeteer.
  * Optimized for Vercel Serverless Functions.
  */
 export async function generatePdf(html: string) {
-  let browser = null;
+  let browser = null
   try {
     browser = await puppeteer.launch({
       args: chromium.args,
       executablePath: await chromium.executablePath(),
       headless: true,
       acceptInsecureCerts: true,
-    });
+    })
 
-    const page = await browser.newPage();
-    
+    const page = await browser.newPage()
+
     // Set content and wait for it to be fully rendered
-    await page.setContent(html, { 
+    await page.setContent(html, {
       waitUntil: ['networkidle0', 'load', 'domcontentloaded'],
-      timeout: 30000 
-    });
+      timeout: 30000,
+    })
 
     // Generate PDF
     const pdf = await page.pdf({
@@ -31,7 +31,7 @@ export async function generatePdf(html: string) {
         top: '40px',
         bottom: '40px',
         left: '40px',
-        right: '40px'
+        right: '40px',
       },
       displayHeaderFooter: true,
       headerTemplate: '<div></div>',
@@ -40,18 +40,20 @@ export async function generatePdf(html: string) {
           Page <span class="pageNumber"></span> of <span class="totalPages"></span>
         </div>
       `,
-    });
+    })
 
-    return pdf;
-  } catch (error) {
-    console.error('Error generating PDF:', error);
+    return pdf
+  }
+  catch (error) {
+    console.error('Error generating PDF:', error)
     throw createError({
       statusCode: 500,
       statusMessage: 'Failed to generate PDF report',
-    });
-  } finally {
+    })
+  }
+  finally {
     if (browser) {
-      await browser.close();
+      await browser.close()
     }
   }
 }

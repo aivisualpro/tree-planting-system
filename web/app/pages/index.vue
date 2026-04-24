@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { TrendingUp, TreePine, Users, MapPin } from 'lucide-vue-next'
+import { MapPin, TreePine, TrendingUp, Users } from 'lucide-vue-next'
+import CountryBreakdownChart from '@/components/dashboard/CountryBreakdownChart.vue'
 import KpiCard from '@/components/dashboard/KpiCard.vue'
 import TimelineChart from '@/components/dashboard/TimelineChart.vue'
-import CountryBreakdownChart from '@/components/dashboard/CountryBreakdownChart.vue'
 import TopSpeciesChart from '@/components/dashboard/TopSpeciesChart.vue'
 import UserActivityHeatmap from '@/components/dashboard/UserActivityHeatmap.vue'
 
@@ -15,7 +15,6 @@ const { data: timeline } = await useFetch('/api/dashboard/timeline')
 const { data: countryBreakdown } = await useFetch('/api/dashboard/country-breakdown')
 const { data: topSpecies } = await useFetch('/api/dashboard/top-species')
 const { data: userActivity } = await useFetch('/api/dashboard/user-activity')
-
 </script>
 
 <template>
@@ -23,26 +22,26 @@ const { data: userActivity } = await useFetch('/api/dashboard/user-activity')
     <main class="@container/main flex flex-1 flex-col gap-4 md:gap-8">
       <!-- KPI Cards -->
       <div class="grid grid-cols-1 gap-4 @xl/main:grid-cols-3">
-        <KpiCard 
-          title="Total Visits" 
-          :value="kpis?.visits || 0" 
-          :icon="MapPin" 
-          format="number" 
-          :trend="12" 
+        <KpiCard
+          title="Total Visits"
+          :value="kpis?.visits || 0"
+          :icon="MapPin"
+          format="number"
+          :trend="12"
         />
-        <KpiCard 
-          title="Total Trees Planted" 
-          :value="kpis?.trees || 0" 
-          :icon="TreePine" 
-          format="number" 
-          :trend="8" 
+        <KpiCard
+          title="Total Trees Planted"
+          :value="kpis?.trees || 0"
+          :icon="TreePine"
+          format="number"
+          :trend="8"
         />
-        <KpiCard 
-          title="Total Attendance" 
-          :value="kpis?.attendance || 0" 
-          :icon="Users" 
-          format="number" 
-          :trend="15" 
+        <KpiCard
+          title="Total Attendance"
+          :value="kpis?.attendance || 0"
+          :icon="Users"
+          format="number"
+          :trend="15"
         />
       </div>
 
@@ -61,7 +60,6 @@ const { data: userActivity } = await useFetch('/api/dashboard/user-activity')
       <div class="grid grid-cols-1 gap-4">
         <UserActivityHeatmap :data="userActivity || []" />
       </div>
-
     </main>
   </div>
 </template>

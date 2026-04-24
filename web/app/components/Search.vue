@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import type { NavGroup, NavMenu } from '~/types/nav'
 import type { TranslationKey } from '~/composables/useLocale'
+import type { NavGroup, NavMenu } from '~/types/nav'
 import { navMenu } from '@/constants/menus'
 
 const { metaSymbol } = useShortcuts()
@@ -39,7 +39,7 @@ function handleSelectLink(link: string) {
   </SidebarMenuButton>
 
   <CommandDialog v-model:open="openCommand">
-    <CommandInput :placeholder="t('common.search') + '...'" />
+    <CommandInput :placeholder="`${t('common.search')}...`" />
     <CommandList>
       <CommandEmpty>{{ t('common.noResults') }}</CommandEmpty>
       <CommandGroup heading="Suggestions">

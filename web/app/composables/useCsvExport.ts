@@ -1,4 +1,4 @@
-export const useCsvExport = () => {
+export function useCsvExport() {
   const exportCsv = (filename: string, content: string) => {
     const blob = new Blob([content], { type: 'text/csv;charset=utf-8;' })
     const link = document.createElement('a')
@@ -10,6 +10,6 @@ export const useCsvExport = () => {
     link.click()
     document.body.removeChild(link)
   }
-  
+
   return { exportCsv }
 }

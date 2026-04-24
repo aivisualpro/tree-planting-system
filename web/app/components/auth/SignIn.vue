@@ -28,7 +28,8 @@ async function onSubmit(event: Event) {
     toast.error('Authentication Failed', {
       description: error.message,
     })
-  } else {
+  }
+  else {
     toast.success('Welcome back!', {
       description: 'You have successfully signed in.',
     })

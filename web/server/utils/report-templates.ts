@@ -8,7 +8,7 @@ export const reportBaseStyles = `
     .no-break { page-break-inside: avoid; }
     .gradient-green { background: linear-gradient(135deg, #166534 0%, #15803d 100%); }
   </style>
-`;
+`
 
 export function getMonthlyCountryReportTemplate(data: any) {
   return `
@@ -94,7 +94,7 @@ export function getMonthlyCountryReportTemplate(data: any) {
         </div>
       </body>
     </html>
-  `;
+  `
 }
 
 export function getVisitReportTemplate(data: any) {
@@ -138,5 +138,5 @@ export function getVisitReportTemplate(data: any) {
         </div>
       </body>
     </html>
-  `;
+  `
 }

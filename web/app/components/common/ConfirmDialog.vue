@@ -33,7 +33,9 @@ const emit = defineEmits(['confirm'])
       </AlertDialogHeader>
       <AlertDialogFooter>
         <AlertDialogCancel>Cancel</AlertDialogCancel>
-        <AlertDialogAction @click="emit('confirm')">Continue</AlertDialogAction>
+        <AlertDialogAction @click="emit('confirm')">
+          Continue
+        </AlertDialogAction>
       </AlertDialogFooter>
     </AlertDialogContent>
   </AlertDialog>

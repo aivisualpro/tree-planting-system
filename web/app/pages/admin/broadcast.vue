@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-import { useForm } from 'vee-validate'
 import { toTypedSchema } from '@vee-validate/zod'
-import * as z from 'zod'
+import { useForm } from 'vee-validate'
+import { ref } from 'vue'
 import { toast } from 'vue-sonner'
+import * as z from 'zod'
 
 const supabase = useSupabaseClient()
 const isSubmitting = ref(false)
@@ -19,28 +19,29 @@ const { handleSubmit, resetForm } = useForm({
   initialValues: {
     targetRole: 'all',
     targetCountry: 'all',
-    message: ''
-  }
+    message: '',
+  },
 })
 
 const onSubmit = handleSubmit(async (values) => {
   isSubmitting.value = true
-  
+
   try {
     // Determine target users based on roles/country
     let query = supabase.from('profiles').select('id')
-    
+
     if (values.targetRole !== 'all') {
       query = query.eq('role', values.targetRole)
     }
     if (values.targetCountry !== 'all') {
       query = query.eq('country', values.targetCountry)
     }
-    
+
     const { data: users, error: usersError } = await query
-    
-    if (usersError) throw usersError
-    
+
+    if (usersError)
+      throw usersError
+
     if (!users || users.length === 0) {
       toast.warning('No users matched the target criteria.')
       isSubmitting.value = false
@@ -52,20 +53,23 @@ const onSubmit = handleSubmit(async (values) => {
       event_type: 'emergency.broadcast',
       payload: { message: values.message },
       recipient_user_id: u.id,
-      channels: ['push', 'email', 'whatsapp'] // broadcast goes to all available channels
+      channels: ['push', 'email', 'whatsapp'], // broadcast goes to all available channels
     }))
 
     const { error: insertError } = await supabase
       .from('notification_events')
       .insert(events)
 
-    if (insertError) throw insertError
+    if (insertError)
+      throw insertError
 
     toast.success(`Successfully scheduled broadcast to ${events.length} users.`)
     resetForm()
-  } catch (error: any) {
+  }
+  catch (error: any) {
     toast.error('Failed to send broadcast', { description: error.message })
-  } finally {
+  }
+  finally {
     isSubmitting.value = false
   }
 })
@@ -74,15 +78,21 @@ const onSubmit = handleSubmit(async (values) => {
 <template>
   <div class="p-6 max-w-4xl mx-auto">
     <div class="mb-8">
-      <h1 class="text-2xl font-bold">Emergency Broadcast</h1>
-      <p class="text-muted-foreground mt-1">Send a critical alert to users via push notification, email, and WhatsApp.</p>
+      <h1 class="text-2xl font-bold">
+        Emergency Broadcast
+      </h1>
+      <p class="text-muted-foreground mt-1">
+        Send a critical alert to users via push notification, email, and WhatsApp.
+      </p>
     </div>
 
     <div class="bg-card text-card-foreground border border-border rounded-lg shadow-sm">
       <div class="p-6 border-b border-border">
-        <h2 class="text-lg font-semibold">Compose Broadcast</h2>
+        <h2 class="text-lg font-semibold">
+          Compose Broadcast
+        </h2>
       </div>
-      
+
       <form class="p-6 space-y-6" @submit="onSubmit">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
           <FormField v-slot="{ componentField }" name="targetRole">
@@ -96,10 +106,18 @@ const onSubmit = handleSubmit(async (values) => {
                 </FormControl>
                 <SelectContent>
                   <SelectGroup>
-                    <SelectItem value="all">All Roles</SelectItem>
-                    <SelectItem value="field_user">Field Users</SelectItem>
-                    <SelectItem value="coordinator">Coordinators</SelectItem>
-                    <SelectItem value="admin">Admins</SelectItem>
+                    <SelectItem value="all">
+                      All Roles
+                    </SelectItem>
+                    <SelectItem value="field_user">
+                      Field Users
+                    </SelectItem>
+                    <SelectItem value="coordinator">
+                      Coordinators
+                    </SelectItem>
+                    <SelectItem value="admin">
+                      Admins
+                    </SelectItem>
                   </SelectGroup>
                 </SelectContent>
               </Select>
@@ -119,10 +137,18 @@ const onSubmit = handleSubmit(async (values) => {
                 </FormControl>
                 <SelectContent>
                   <SelectGroup>
-                    <SelectItem value="all">All Countries</SelectItem>
-                    <SelectItem value="Tanzania">Tanzania</SelectItem>
-                    <SelectItem value="Kenya">Kenya</SelectItem>
-                    <SelectItem value="Uganda">Uganda</SelectItem>
+                    <SelectItem value="all">
+                      All Countries
+                    </SelectItem>
+                    <SelectItem value="Tanzania">
+                      Tanzania
+                    </SelectItem>
+                    <SelectItem value="Kenya">
+                      Kenya
+                    </SelectItem>
+                    <SelectItem value="Uganda">
+                      Uganda
+                    </SelectItem>
                   </SelectGroup>
                 </SelectContent>
               </Select>
@@ -136,10 +162,10 @@ const onSubmit = handleSubmit(async (values) => {
           <FormItem>
             <FormLabel>Message Content</FormLabel>
             <FormControl>
-              <Textarea 
-                placeholder="Enter the broadcast message..." 
-                class="min-h-[150px] resize-y" 
-                v-bind="componentField" 
+              <Textarea
+                placeholder="Enter the broadcast message..."
+                class="min-h-[150px] resize-y"
+                v-bind="componentField"
               />
             </FormControl>
             <FormDescription>

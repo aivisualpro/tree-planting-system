@@ -1,3 +1,10 @@
+<script setup lang="ts">
+definePageMeta({
+  layout: 'blank',
+  auth: false,
+})
+</script>
+
 <template>
   <div class="max-w-4xl mx-auto p-8 prose dark:prose-invert">
     <h1>Terms of Service</h1>
@@ -24,10 +31,3 @@
     <p>If you have any questions about these terms, please contact us.</p>
   </div>
 </template>
-
-<script setup lang="ts">
-definePageMeta({
-  layout: 'blank',
-  auth: false,
-})
-</script>

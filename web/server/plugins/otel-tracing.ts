@@ -19,11 +19,12 @@ interface AxiomEvent {
   [key: string]: unknown
 }
 
-async function exportSpan(span: TraceSpan & { status: 'ok' | 'error'; error?: string }): Promise<void> {
+async function exportSpan(span: TraceSpan & { status: 'ok' | 'error', error?: string }): Promise<void> {
   const axiomApiKey = process.env.AXIOM_API_KEY
   const axiomDataset = process.env.AXIOM_DATASET || 'tree-planting-prod'
 
-  if (!axiomApiKey) return // skip in dev if not configured
+  if (!axiomApiKey)
+    return // skip in dev if not configured
 
   const event: AxiomEvent = {
     _time: new Date().toISOString(),
@@ -33,13 +34,14 @@ async function exportSpan(span: TraceSpan & { status: 'ok' | 'error'; error?: st
     status: span.status,
     ...span.attributes,
   }
-  if (span.error) event.error = span.error
+  if (span.error)
+    event.error = span.error
 
   try {
     await fetch(`https://api.axiom.co/v1/datasets/${axiomDataset}/ingest`, {
       method: 'POST',
       headers: {
-        Authorization: `Bearer ${axiomApiKey}`,
+        'Authorization': `Bearer ${axiomApiKey}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify([event]),
@@ -54,7 +56,8 @@ export default defineNitroPlugin((nitro) => {
   // Hook into every request/response cycle
   nitro.hooks.hook('request', (event) => {
     const url = event.node.req.url ?? '/'
-    if (!url.startsWith('/api/')) return
+    if (!url.startsWith('/api/'))
+      return
 
     const startTime = Date.now()
     ;(event as any).__traceStart = startTime
@@ -63,11 +66,13 @@ export default defineNitroPlugin((nitro) => {
 
   nitro.hooks.hook('afterResponse', (event) => {
     const url = event.node.req.url ?? '/'
-    if (!url.startsWith('/api/')) return
+    if (!url.startsWith('/api/'))
+      return
 
     const startTime = (event as any).__traceStart as number | undefined
     const name = (event as any).__traceName as string | undefined
-    if (!startTime || !name) return
+    if (!startTime || !name)
+      return
 
     const statusCode = event.node.res.statusCode ?? 200
 

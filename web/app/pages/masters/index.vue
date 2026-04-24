@@ -4,4 +4,7 @@ import { useRouter } from 'vue-router'
 const router = useRouter()
 router.replace('/masters/countries')
 </script>
-<template><div>Loading...</div></template>
+
+<template>
+  <div>Loading...</div>
+</template>

@@ -1,17 +1,17 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import VChart from 'vue-echarts'
+import { PieChart } from 'echarts/charts'
+import { LegendComponent, TooltipComponent } from 'echarts/components'
 import { use } from 'echarts/core'
 import { CanvasRenderer } from 'echarts/renderers'
-import { PieChart } from 'echarts/charts'
-import { TooltipComponent, LegendComponent } from 'echarts/components'
-
-use([CanvasRenderer, PieChart, TooltipComponent, LegendComponent])
+import { ref } from 'vue'
+import VChart from 'vue-echarts'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
 const props = defineProps<{
   data: any[]
 }>()
+
+use([CanvasRenderer, PieChart, TooltipComponent, LegendComponent])
 
 const option = computed(() => ({
   tooltip: { trigger: 'item' },
@@ -25,20 +25,19 @@ const option = computed(() => ({
       itemStyle: {
         borderRadius: 10,
         borderColor: '#fff',
-        borderWidth: 2
+        borderWidth: 2,
       },
       label: { show: false, position: 'center' },
       emphasis: {
-        label: { show: true, fontSize: '18', fontWeight: 'bold' }
+        label: { show: true, fontSize: '18', fontWeight: 'bold' },
       },
       labelLine: { show: false },
-      data: props.data && props.data.length > 0 
+      data: props.data && props.data.length > 0
         ? props.data.map((d: any) => ({ value: d.visits, name: d.country_name }))
-        : [{ value: 0, name: 'No Data' }]
-    }
-  ]
+        : [{ value: 0, name: 'No Data' }],
+    },
+  ],
 }))
-
 </script>
 
 <template>

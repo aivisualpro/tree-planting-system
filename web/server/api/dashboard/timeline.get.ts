@@ -1,5 +1,5 @@
-import { serverSupabaseServiceRole } from '#supabase/server'
 import type { Database } from '../../../../shared/types/database'
+import { serverSupabaseServiceRole } from '#supabase/server'
 
 export default defineEventHandler(async (event) => {
   const client = serverSupabaseServiceRole<Database>(event)
@@ -22,20 +22,21 @@ export default defineEventHandler(async (event) => {
   // Group by date
   const timelineMap = new Map<string, { trees: number, attendance: number }>()
 
-  data.forEach(visit => {
-    if (!visit.scheduled_date) return
-    
+  data.forEach((visit) => {
+    if (!visit.scheduled_date)
+      return
+
     const existing = timelineMap.get(visit.scheduled_date) || { trees: 0, attendance: 0 }
     timelineMap.set(visit.scheduled_date, {
       trees: existing.trees + Number(visit.total_trees_planted || 0),
-      attendance: existing.attendance + Number(visit.attendance || 0)
+      attendance: existing.attendance + Number(visit.attendance || 0),
     })
   })
 
   // Convert to array format for ECharts
   const timeline = Array.from(timelineMap.entries()).map(([date, metrics]) => ({
     date,
-    ...metrics
+    ...metrics,
   }))
 
   return timeline

@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
-import { usePageHeader } from '~/composables/usePageHeader'
 import type { Database } from '../../../shared/types/database'
+import { onMounted, ref } from 'vue'
+import { usePageHeader } from '~/composables/usePageHeader'
 
 const { setHeader } = usePageHeader()
 setHeader({ title: 'System Audit Log', icon: 'i-lucide-activity', description: 'Monitor all system events and data modifications.' })
@@ -10,7 +10,7 @@ const supabase = useSupabaseClient<Database>()
 const logs = ref<any[]>([])
 const loading = ref(true)
 
-const fetchLogs = async () => {
+async function fetchLogs() {
   loading.value = true
   const { data, error } = await supabase
     // @ts-ignore
@@ -18,7 +18,7 @@ const fetchLogs = async () => {
     .select('*, user:users(name)')
     .order('created_at', { ascending: false })
     .limit(100)
-    
+
   if (!error && data) {
     logs.value = data
   }
@@ -54,7 +54,7 @@ onMounted(() => fetchLogs())
                 </TableRow>
               </TableHeader>
               <TableBody>
-                <TableRow v-if="loading" v-for="i in 5" :key="`skel-${i}`">
+                <TableRow v-for="i in 5" v-if="loading" :key="`skel-${i}`">
                   <TableCell><Skeleton class="h-4 w-[150px]" /></TableCell>
                   <TableCell><Skeleton class="h-4 w-[100px]" /></TableCell>
                   <TableCell><Skeleton class="h-4 w-[80px]" /></TableCell>
@@ -62,13 +62,19 @@ onMounted(() => fetchLogs())
                   <TableCell><Skeleton class="h-4 w-[250px]" /></TableCell>
                 </TableRow>
                 <TableRow v-else-if="logs.length === 0">
-                  <TableCell colspan="5" class="h-24 text-center">No audit logs found.</TableCell>
+                  <TableCell colspan="5" class="h-24 text-center">
+                    No audit logs found.
+                  </TableCell>
                 </TableRow>
-                <TableRow v-else v-for="log in logs" :key="log.id">
-                  <TableCell class="font-mono text-xs">{{ new Date(log.created_at).toLocaleString() }}</TableCell>
+                <TableRow v-for="log in logs" v-else :key="log.id">
+                  <TableCell class="font-mono text-xs">
+                    {{ new Date(log.created_at).toLocaleString() }}
+                  </TableCell>
                   <TableCell>{{ log.user?.name || 'System' }}</TableCell>
                   <TableCell>
-                    <Badge :variant="log.action === 'DELETE' ? 'destructive' : 'default'">{{ log.action }}</Badge>
+                    <Badge :variant="log.action === 'DELETE' ? 'destructive' : 'default'">
+                      {{ log.action }}
+                    </Badge>
                   </TableCell>
                   <TableCell>{{ log.entity_type }} ({{ log.entity_id }})</TableCell>
                   <TableCell class="text-xs text-muted-foreground truncate max-w-[300px]" :title="JSON.stringify(log.details)">

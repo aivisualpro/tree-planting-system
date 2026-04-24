@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
 import type { Database } from '../../../../shared/types/database'
+import { onMounted, ref } from 'vue'
 
 const props = defineProps<{
-  table: string,
-  title: string,
-  description: string,
+  table: string
+  title: string
+  description: string
   columns: { key: string, label: string }[]
 }>()
 
@@ -13,11 +13,11 @@ const supabase = useSupabaseClient<Database>()
 const items = ref<any[]>([])
 const loading = ref(true)
 
-const fetchItems = async () => {
+async function fetchItems() {
   loading.value = true
   // @ts-ignore - dynamic table name
   const { data, error } = await supabase.from(props.table).select('*').order('id', { ascending: true })
-  
+
   if (!error && data) {
     items.value = data
   }
@@ -26,7 +26,7 @@ const fetchItems = async () => {
 
 onMounted(() => {
   fetchItems()
-  
+
   // Real-time subscription
   supabase.channel(`public:${props.table}`)
     .on('postgres_changes', { event: '*', schema: 'public', table: props.table }, () => {
@@ -52,25 +52,31 @@ onMounted(() => {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead v-for="col in columns" :key="col.key">{{ col.label }}</TableHead>
-              <TableHead class="text-right">Actions</TableHead>
+              <TableHead v-for="col in columns" :key="col.key">
+                {{ col.label }}
+              </TableHead>
+              <TableHead class="text-right">
+                Actions
+              </TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            <TableRow v-if="loading" v-for="i in 3" :key="`skeleton-${i}`">
+            <TableRow v-for="i in 3" v-if="loading" :key="`skeleton-${i}`">
               <TableCell v-for="col in columns" :key="`skel-${col.key}`">
                 <Skeleton class="h-4 w-full max-w-[100px]" />
               </TableCell>
-              <TableCell class="text-right"><Skeleton class="h-8 w-8 ml-auto" /></TableCell>
+              <TableCell class="text-right">
+                <Skeleton class="h-8 w-8 ml-auto" />
+              </TableCell>
             </TableRow>
-            
+
             <TableRow v-else-if="items.length === 0">
               <TableCell :colspan="columns.length + 1" class="h-24 text-center">
                 No records found.
               </TableCell>
             </TableRow>
 
-            <TableRow v-else v-for="item in items" :key="item.id">
+            <TableRow v-for="item in items" v-else :key="item.id">
               <TableCell v-for="col in columns" :key="col.key">
                 {{ item[col.key] }}
               </TableCell>

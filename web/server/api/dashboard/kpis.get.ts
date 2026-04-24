@@ -1,10 +1,10 @@
-import { serverSupabaseServiceRole } from '#supabase/server'
 import type { Database } from '../../../../shared/types/database'
+import { serverSupabaseServiceRole } from '#supabase/server'
 import { z } from 'zod'
 
 const dashboardQuerySchema = z.object({
   countryId: z.string().uuid().optional(),
-  dateRange: z.string().optional()
+  dateRange: z.string().optional(),
 })
 
 export default defineEventHandler(async (event) => {
@@ -28,7 +28,7 @@ export default defineEventHandler(async (event) => {
       trees: acc.trees + Number(row.total_trees || 0),
       attendance: acc.attendance + Number(row.total_attendance || 0),
     }),
-    { visits: 0, trees: 0, attendance: 0 }
+    { visits: 0, trees: 0, attendance: 0 },
   )
 
   return aggregated

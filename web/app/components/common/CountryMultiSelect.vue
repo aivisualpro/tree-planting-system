@@ -16,9 +16,15 @@ const modelValue = defineModel<string>()
       <SelectValue placeholder="Select country..." />
     </SelectTrigger>
     <SelectContent>
-      <SelectItem value="ke">Kenya</SelectItem>
-      <SelectItem value="ug">Uganda</SelectItem>
-      <SelectItem value="tz">Tanzania</SelectItem>
+      <SelectItem value="ke">
+        Kenya
+      </SelectItem>
+      <SelectItem value="ug">
+        Uganda
+      </SelectItem>
+      <SelectItem value="tz">
+        Tanzania
+      </SelectItem>
     </SelectContent>
   </Select>
 </template>

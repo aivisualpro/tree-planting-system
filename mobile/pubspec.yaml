@@ -66,6 +66,8 @@ dependencies:
   freezed_annotation: ^2.4.1
   mutex: ^3.1.0
   uuid: ^4.3.3
+  package_info_plus: ^8.0.0
+  url_launcher: ^6.3.0
   
   # Security Additions
   http_certificate_pinning: ^1.0.4

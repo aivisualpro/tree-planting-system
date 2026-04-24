@@ -10,8 +10,8 @@ const tableConfig = {
   description: 'Manage allowed countries and their codes.',
   columns: [
     { key: 'id', label: 'ID' },
-    { key: 'name', label: 'Country Name' }
-  ]
+    { key: 'name', label: 'Country Name' },
+  ],
 }
 </script>
 

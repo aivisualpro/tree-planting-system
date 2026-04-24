@@ -30,33 +30,43 @@ const fallbackTitle = computed(() => {
 
 // Resolve title: prefer translation key, then static title, then fallback
 const displayTitle = computed(() => {
-  if (metaHeader.value.titleKey) return t(metaHeader.value.titleKey)
-  if (metaHeader.value.title) return metaHeader.value.title
-  
+  if (metaHeader.value.titleKey)
+    return t(metaHeader.value.titleKey)
+  if (metaHeader.value.title)
+    return metaHeader.value.title
+
   if (isHydrated.value) {
-    if (headerState.value.titleKey) return t(headerState.value.titleKey)
-    if (headerState.value.title) return headerState.value.title
+    if (headerState.value.titleKey)
+      return t(headerState.value.titleKey)
+    if (headerState.value.title)
+      return headerState.value.title
   }
-  
+
   return fallbackTitle.value
 })
 
 // Resolve description: prefer translation key, then static description
 const displayDescription = computed(() => {
-  if (metaHeader.value.descriptionKey) return t(metaHeader.value.descriptionKey)
-  if (metaHeader.value.description) return metaHeader.value.description
+  if (metaHeader.value.descriptionKey)
+    return t(metaHeader.value.descriptionKey)
+  if (metaHeader.value.description)
+    return metaHeader.value.description
 
   if (isHydrated.value) {
-    if (headerState.value.descriptionKey) return t(headerState.value.descriptionKey)
-    if (headerState.value.description) return headerState.value.description
+    if (headerState.value.descriptionKey)
+      return t(headerState.value.descriptionKey)
+    if (headerState.value.description)
+      return headerState.value.description
   }
 
   return ''
 })
 
 const displayIcon = computed(() => {
-  if (metaHeader.value.icon) return metaHeader.value.icon
-  if (isHydrated.value && headerState.value.icon) return headerState.value.icon
+  if (metaHeader.value.icon)
+    return metaHeader.value.icon
+  if (isHydrated.value && headerState.value.icon)
+    return headerState.value.icon
   return ''
 })
 </script>

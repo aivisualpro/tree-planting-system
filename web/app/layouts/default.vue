@@ -11,7 +11,7 @@ const { isImpersonating, impersonatedUserName, exitImpersonation } = useImperson
           <Icon name="lucide:user-check" class="w-4 h-4" />
           <span>VIEWING AS {{ impersonatedUserName }}</span>
         </div>
-        <button @click="exitImpersonation" class="bg-white text-red-500 px-3 py-1 rounded text-xs font-bold hover:bg-red-50">
+        <button class="bg-white text-red-500 px-3 py-1 rounded text-xs font-bold hover:bg-red-50" @click="exitImpersonation">
           Exit impersonation
         </button>
       </div>

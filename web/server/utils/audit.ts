@@ -1,11 +1,11 @@
-import { serverSupabaseServiceRole } from '#supabase/server'
-import { serverSupabaseUser } from '#supabase/server'
 import type { H3Event } from 'h3'
 import type { Database } from '../../../shared/types/database'
+import { serverSupabaseServiceRole, serverSupabaseUser } from '#supabase/server'
 
 export async function logAdminAction(event: H3Event, action: string, details: any = {}) {
   const user = await serverSupabaseUser(event)
-  if (!user) return
+  if (!user)
+    return
 
   const client = serverSupabaseServiceRole<Database>(event)
 
@@ -15,6 +15,6 @@ export async function logAdminAction(event: H3Event, action: string, details: an
     operation: 'INSERT',
     actor_id: user.id,
     new_row: { action, details },
-    occurred_at: new Date().toISOString()
+    occurred_at: new Date().toISOString(),
   })
 }

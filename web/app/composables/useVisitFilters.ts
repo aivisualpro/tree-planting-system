@@ -3,9 +3,9 @@
 // - Pinia cache with staleTime (§9)
 // - useAsyncData with server-side SSR (§9)
 
-import { ref, watch, computed } from 'vue'
-import { useAsyncData } from 'nuxt/app'
 import { useDebounceFn } from '@vueuse/core'
+import { useAsyncData } from 'nuxt/app'
+import { computed, ref, watch } from 'vue'
 
 export interface VisitFilters {
   countryId?: string
@@ -59,10 +59,14 @@ export function useVisitFilters(initialFilters: Partial<VisitFilters> = {}) {
       }
 
       const params = new URLSearchParams()
-      if (filters.value.countryId) params.set('countryId', filters.value.countryId)
-      if (filters.value.status) params.set('status', filters.value.status)
-      if (filters.value.dateFrom) params.set('dateFrom', filters.value.dateFrom)
-      if (filters.value.dateTo) params.set('dateTo', filters.value.dateTo)
+      if (filters.value.countryId)
+        params.set('countryId', filters.value.countryId)
+      if (filters.value.status)
+        params.set('status', filters.value.status)
+      if (filters.value.dateFrom)
+        params.set('dateFrom', filters.value.dateFrom)
+      if (filters.value.dateTo)
+        params.set('dateTo', filters.value.dateTo)
       params.set('page', String(filters.value.page))
       params.set('limit', String(filters.value.limit))
 
@@ -74,7 +78,7 @@ export function useVisitFilters(initialFilters: Partial<VisitFilters> = {}) {
     {
       server: true, // §9 – SSR on first load
       lazy: false,
-    }
+    },
   )
 
   function setFilter(patch: Partial<VisitFilters>) {

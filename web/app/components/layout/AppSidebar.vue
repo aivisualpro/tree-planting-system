@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import type { NavGroup, NavLink, NavSectionTitle } from '~/types/nav'
 import type { TranslationKey } from '~/composables/useLocale'
+import type { NavGroup, NavLink, NavSectionTitle } from '~/types/nav'
 import { navMenu, navMenuBottom } from '~/constants/menus'
 
 function resolveNavItemComponent(item: NavLink | NavGroup | NavSectionTitle): any {

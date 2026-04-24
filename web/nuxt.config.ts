@@ -31,7 +31,7 @@ export default defineNuxtConfig({
       alias: {
         cookie: 'cookie-es',
         // §7 – tree-shake lodash: force named-function imports
-        'lodash': 'lodash-es',
+        lodash: 'lodash-es',
       },
     },
     build: {
@@ -39,7 +39,8 @@ export default defineNuxtConfig({
       chunkSizeWarningLimit: 200, // warn if any chunk > 200 KB
       rollupOptions: {
         onwarn(warning, warn) {
-          if (warning.message.includes('"PostgrestError"') || warning.message.includes('@supabase')) return
+          if (warning.message.includes('"PostgrestError"') || warning.message.includes('@supabase'))
+            return
           warn(warning)
         },
         output: {
@@ -49,9 +50,12 @@ export default defineNuxtConfig({
               return 'echarts'
             }
             // Vendor split
-            if (id.includes('node_modules/@supabase')) return 'supabase'
-            if (id.includes('node_modules/date-fns')) return 'date-fns'
-            if (id.includes('node_modules/zod')) return 'zod'
+            if (id.includes('node_modules/@supabase'))
+              return 'supabase'
+            if (id.includes('node_modules/date-fns'))
+              return 'date-fns'
+            if (id.includes('node_modules/zod'))
+              return 'zod'
           },
         },
       },
@@ -69,15 +73,18 @@ export default defineNuxtConfig({
   },
 
   hooks: {
-    'nitro:build:before'(nitro) {
+    'nitro:build:before': function (nitro) {
       nitro.options.rollupConfig = nitro.options.rollupConfig || ({} as any)
       const originalOnWarn = nitro.options.rollupConfig!.onwarn
       nitro.options.rollupConfig!.onwarn = (warning, warn) => {
-        if (warning.message.includes('"PostgrestError"')) return
-        if (warning.code === 'CIRCULAR_DEPENDENCY') return
+        if (warning.message.includes('"PostgrestError"'))
+          return
+        if (warning.code === 'CIRCULAR_DEPENDENCY')
+          return
         if (originalOnWarn) {
           originalOnWarn(warning, warn)
-        } else {
+        }
+        else {
           warn(warning)
         }
       }
@@ -99,7 +106,7 @@ export default defineNuxtConfig({
     '@pinia/nuxt',
     '@nuxtjs/color-mode',
     '@nuxt/fonts',
-    '@nuxt/image',       // §8 – responsive images + webp
+    '@nuxt/image', // §8 – responsive images + webp
     '@nuxtjs/supabase',
     '@nuxtjs/i18n',
     'nuxt-security',
@@ -197,9 +204,9 @@ export default defineNuxtConfig({
   security: {
     headers: {
       contentSecurityPolicy: {
-        'default-src': ["'self'"],
+        'default-src': ['\'self\''],
         'connect-src': [
-          "'self'",
+          '\'self\'',
           'http://127.0.0.1:54321',
           'ws://127.0.0.1:54321',
           'http://localhost:54321',
@@ -208,15 +215,15 @@ export default defineNuxtConfig({
           'wss://*.supabase.co',
           'https://api.axiom.co',
         ],
-        'base-uri': ["'self'"],
-        'font-src': ["'self'", 'https:', 'data:'],
-        'form-action': ["'self'"],
-        'frame-ancestors': ["'none'"],
-        'img-src': ["'self'", 'data:', 'https:', 'blob:'],
-        'object-src': ["'none'"],
-        'script-src-attr': ["'none'"],
-        'style-src': ["'self'", 'https:', "'unsafe-inline'"],
-        'script-src': ["'self'", 'https:', "'unsafe-inline'", "'strict-dynamic'", "'nonce-{{nonce}}'"],
+        'base-uri': ['\'self\''],
+        'font-src': ['\'self\'', 'https:', 'data:'],
+        'form-action': ['\'self\''],
+        'frame-ancestors': ['\'none\''],
+        'img-src': ['\'self\'', 'data:', 'https:', 'blob:'],
+        'object-src': ['\'none\''],
+        'script-src-attr': ['\'none\''],
+        'style-src': ['\'self\'', 'https:', '\'unsafe-inline\''],
+        'script-src': ['\'self\'', 'https:', '\'unsafe-inline\'', '\'strict-dynamic\'', '\'nonce-{{nonce}}\''],
         'upgrade-insecure-requests': true,
       },
       xFrameOptions: 'DENY',

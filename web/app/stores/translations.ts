@@ -1,5 +1,5 @@
-import { defineStore } from 'pinia';
-import { useSupabaseClient } from '#imports';
+import { useSupabaseClient } from '#imports'
+import { defineStore } from 'pinia'
 
 export const useTranslationsStore = defineStore('translations', {
   state: () => ({
@@ -7,15 +7,15 @@ export const useTranslationsStore = defineStore('translations', {
   }),
   actions: {
     getCacheKey(entityType: string, entityId: string, field: string, locale: string) {
-      return `${entityType}:${entityId}:${field}:${locale}`;
+      return `${entityType}:${entityId}:${field}:${locale}`
     },
     async fetchTranslation(entityType: string, entityId: string, field: string, locale: string): Promise<string | null> {
-      const key = this.getCacheKey(entityType, entityId, field, locale);
+      const key = this.getCacheKey(entityType, entityId, field, locale)
       if (this.cache[key] !== undefined) {
-        return this.cache[key];
+        return this.cache[key]
       }
 
-      const supabase = useSupabaseClient();
+      const supabase = useSupabaseClient()
       const { data, error } = await supabase
         .from('translations')
         .select('value')
@@ -23,19 +23,19 @@ export const useTranslationsStore = defineStore('translations', {
         .eq('entity_id', entityId)
         .eq('field', field)
         .eq('locale', locale)
-        .maybeSingle();
+        .maybeSingle()
 
       if (!error && data) {
-        this.cache[key] = data.value;
-        return data.value;
+        this.cache[key] = data.value
+        return data.value
       }
 
-      this.cache[key] = ''; // cache miss
-      return null;
+      this.cache[key] = '' // cache miss
+      return null
     },
     setTranslation(entityType: string, entityId: string, field: string, locale: string, value: string) {
-      const key = this.getCacheKey(entityType, entityId, field, locale);
-      this.cache[key] = value;
-    }
-  }
-});
+      const key = this.getCacheKey(entityType, entityId, field, locale)
+      this.cache[key] = value
+    },
+  },
+})

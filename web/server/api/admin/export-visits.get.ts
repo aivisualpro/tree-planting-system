@@ -1,18 +1,18 @@
 import { serverSupabaseServiceRole } from '#supabase/server'
-import { requireRole } from '../../utils/require-role'
-import { logAdminAction } from '../../utils/audit'
 import { z } from 'zod'
+import { logAdminAction } from '../../utils/audit'
+import { requireRole } from '../../utils/require-role'
 
 const exportQuerySchema = z.object({
-  format: z.enum(['csv', 'json']).default('csv').optional()
+  format: z.enum(['csv', 'json']).default('csv').optional(),
 })
 
 export default defineEventHandler(async (event) => {
   await requireRole(event, ['admin', 'super_admin'])
-  
+
   // Zod validation on every server/api route input
   const query = await getValidatedQuery(event, exportQuerySchema.parse)
-  
+
   const client = serverSupabaseServiceRole(event)
 
   await logAdminAction(event, 'export_visits', { format: query.format })

@@ -1,12 +1,13 @@
 <script setup lang="ts">
 import { toast } from 'vue-sonner'
+
 const user = useSupabaseUser()
 const exporting = ref(false)
 const showDeleteDialog = ref(false)
 const confirmEmail = ref('')
 const deleting = ref(false)
 
-const downloadData = async () => {
+async function downloadData() {
   exporting.value = true
   try {
     const response = await $fetch('/api/gdpr/export', { method: 'POST' })
@@ -20,36 +21,41 @@ const downloadData = async () => {
     a.click()
     window.URL.revokeObjectURL(url)
     toast.success('Data export started')
-  } catch (err: any) {
+  }
+  catch (err: any) {
     if (err.statusCode === 429) {
       toast.error('One export per day allowed. Please try again tomorrow.')
-    } else {
+    }
+    else {
       toast.error('Failed to generate export')
     }
-  } finally {
+  }
+  finally {
     exporting.value = false
   }
 }
 
-const anonymizeAccount = async () => {
+async function anonymizeAccount() {
   if (confirmEmail.value !== user.value?.email) {
     toast.error('Email does not match')
     return
   }
-  
+
   deleting.value = true
   try {
     await $fetch('/api/gdpr/anonymize', {
       method: 'POST',
-      body: { confirmEmail: confirmEmail.value }
+      body: { confirmEmail: confirmEmail.value },
     })
     toast.success('Account anonymized. You will be logged out.')
     setTimeout(() => {
       window.location.href = '/login'
     }, 2000)
-  } catch (err) {
+  }
+  catch (err) {
     toast.error('Failed to anonymize account')
-  } finally {
+  }
+  finally {
     deleting.value = false
   }
 }
@@ -58,7 +64,9 @@ const anonymizeAccount = async () => {
 <template>
   <div class="space-y-6">
     <div>
-      <h3 class="text-lg font-medium">Privacy & Data Portability</h3>
+      <h3 class="text-lg font-medium">
+        Privacy & Data Portability
+      </h3>
       <p class="text-sm text-muted-foreground">
         Manage your data and exercise your rights to portability and erasure (GDPR).
       </p>
@@ -98,13 +106,15 @@ const anonymizeAccount = async () => {
         <CardFooter class="border-t border-destructive/10 px-6 py-4">
           <Dialog v-model:open="showDeleteDialog">
             <DialogTrigger as-child>
-              <Button variant="destructive">Anonymize Account</Button>
+              <Button variant="destructive">
+                Anonymize Account
+              </Button>
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
                 <DialogTitle>Are you absolutely sure?</DialogTitle>
                 <DialogDescription>
-                  This action cannot be undone. This will permanently redact your personal information from our servers. 
+                  This action cannot be undone. This will permanently redact your personal information from our servers.
                   Historical visit data will remain for reporting purposes but will no longer be associated with you.
                 </DialogDescription>
               </DialogHeader>
@@ -113,7 +123,9 @@ const anonymizeAccount = async () => {
                 <Input id="email-confirm" v-model="confirmEmail" class="mt-2" placeholder="Enter your email" />
               </div>
               <DialogFooter>
-                <Button variant="outline" @click="showDeleteDialog = false">Cancel</Button>
+                <Button variant="outline" @click="showDeleteDialog = false">
+                  Cancel
+                </Button>
                 <Button variant="destructive" :loading="deleting" @click="anonymizeAccount">
                   Confirm Anonymization
                 </Button>

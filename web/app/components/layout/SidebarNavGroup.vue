@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { SidebarMenuButtonVariants } from '~/components/ui/sidebar'
-import type { NavGroup } from '~/types/nav'
 import type { TranslationKey } from '~/composables/useLocale'
+import type { NavGroup } from '~/types/nav'
 import { useSidebar } from '~/components/ui/sidebar'
 
 const props = withDefaults(defineProps<{

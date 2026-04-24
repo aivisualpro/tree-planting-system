@@ -7,12 +7,8 @@
 // Or in Nuxt with auto-import (lazy prefix):
 //   <LazyChartsLazyEChart :option="chartOption" />
 
-<template>
-  <div ref="chartRef" :style="{ width: width, height: height }" />
-</template>
-
 <script setup lang="ts">
-import { ref, onMounted, onBeforeUnmount, watch } from 'vue'
+import { onBeforeUnmount, onMounted, ref, watch } from 'vue'
 
 interface Props {
   option: Record<string, unknown>
@@ -32,14 +28,16 @@ const chartRef = ref<HTMLElement | null>(null)
 let chart: any = null
 
 onMounted(async () => {
-  if (!chartRef.value) return
+  if (!chartRef.value)
+    return
 
   // §7 – dynamic import: ECharts loads only when this component is rendered
   const echarts = await import('echarts')
   chart = echarts.init(chartRef.value)
   chart.setOption(props.option)
 
-  if (props.loading) chart.showLoading()
+  if (props.loading)
+    chart.showLoading()
 
   window.addEventListener('resize', handleResize)
 })
@@ -54,7 +52,8 @@ watch(() => props.option, (newOption) => {
 }, { deep: true })
 
 watch(() => props.loading, (loading) => {
-  if (loading) chart?.showLoading()
+  if (loading)
+    chart?.showLoading()
   else chart?.hideLoading()
 })
 
@@ -62,3 +61,7 @@ function handleResize() {
   chart?.resize()
 }
 </script>
+
+<template>
+  <div ref="chartRef" :style="{ width, height }" />
+</template>

@@ -1,0 +1,48 @@
+name: Release & Changelog
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  changelog:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Generate Web Changelog
+        uses: triPSs/conventional-changelog-action@v5
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          git-path: './web'
+          output-file: 'web/CHANGELOG.md'
+          version-file: 'web/package.json'
+          tag-prefix: 'web-v'
+          skip-git-pull: 'true'
+          skip-on-empty: 'true'
+
+      - name: Generate Mobile Changelog
+        uses: triPSs/conventional-changelog-action@v5
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          git-path: './mobile'
+          output-file: 'mobile/CHANGELOG.md'
+          version-file: 'mobile/pubspec.yaml'
+          tag-prefix: 'mobile-v'
+          skip-git-pull: 'true'
+          skip-on-empty: 'true'
+          
+      - name: Generate Supabase Changelog
+        uses: triPSs/conventional-changelog-action@v5
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          git-path: './supabase'
+          output-file: 'supabase/CHANGELOG.md'
+          tag-prefix: 'supabase-v'
+          skip-git-pull: 'true'
+          skip-on-empty: 'true'
+          skip-version-file: 'true'

@@ -1,5 +1,5 @@
-import { serverSupabaseServiceRole } from '#supabase/server'
 import type { Database } from '../../../../shared/types/database'
+import { serverSupabaseServiceRole } from '#supabase/server'
 
 export default defineEventHandler(async (event) => {
   const client = serverSupabaseServiceRole<Database>(event)
@@ -24,7 +24,7 @@ export default defineEventHandler(async (event) => {
     country_name: countryMap.get(row.country_id || '') || 'Unknown',
     visits: row.total_visits,
     trees: row.total_trees,
-    attendance: row.total_attendance
+    attendance: row.total_attendance,
   }))
 
   return breakdown

@@ -9,7 +9,7 @@ import {
 } from '@/components/ui/table'
 
 defineProps<{
-  columns: { key: string; label: string }[]
+  columns: { key: string, label: string }[]
   data: any[]
 }>()
 </script>
@@ -27,7 +27,9 @@ defineProps<{
       <TableBody>
         <TableRow v-for="(row, i) in data" :key="i">
           <TableCell v-for="col in columns" :key="col.key">
-            <slot :name="'cell-'+col.key" :row="row">{{ row[col.key] }}</slot>
+            <slot :name="`cell-${col.key}`" :row="row">
+              {{ row[col.key] }}
+            </slot>
           </TableCell>
         </TableRow>
         <TableRow v-if="data.length === 0">
