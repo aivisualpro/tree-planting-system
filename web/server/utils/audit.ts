@@ -1,12 +1,13 @@
 import { serverSupabaseServiceRole } from '#supabase/server'
 import { serverSupabaseUser } from '#supabase/server'
 import type { H3Event } from 'h3'
+import type { Database } from '../../../shared/types/database'
 
 export async function logAdminAction(event: H3Event, action: string, details: any = {}) {
   const user = await serverSupabaseUser(event)
   if (!user) return
 
-  const client = serverSupabaseServiceRole(event)
+  const client = serverSupabaseServiceRole<Database>(event)
 
   await client.from('audit_log').insert({
     table_name: 'admin_actions',

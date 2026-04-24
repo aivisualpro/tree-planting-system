@@ -1,6 +1,8 @@
 import { z } from 'zod'
 import { serverSupabaseServiceRole } from '#supabase/server'
 import { requireRole } from '../../utils/require-role'
+import { logAdminAction } from '../../utils/audit'
+
 
 const inviteSchema = z.object({
   email: z.string().email(),

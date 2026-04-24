@@ -150,6 +150,7 @@ export default defineNuxtConfig({
     }
   },
 
+  // @ts-ignore - Module types not loaded
   security: {
     headers: {
       contentSecurityPolicy: {
