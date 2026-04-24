@@ -6,7 +6,7 @@ import 'package:flutter/widgets.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:workmanager/workmanager.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:http_certificate_pinning/http_certificate_pinning.dart';
+// import 'package:http_certificate_pinning/http_certificate_pinning.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart';
 import 'core/config/env.dart';
@@ -69,7 +69,7 @@ Future<void> _bootstrapDeferred() async {
   await Future.wait([
     _initFirebase(),
     _initOfflineMaps(),
-    _initCertPinning(),
+    // _initCertPinning(),
     _registerWorkManager(),
   ]);
 }
@@ -94,6 +94,7 @@ Future<void> _initOfflineMaps() async {
   }
 }
 
+/*
 Future<void> _initCertPinning() async {
   if (kIsWeb) return;
   try {
@@ -108,6 +109,7 @@ Future<void> _initCertPinning() async {
     debugPrint('Certificate pinning failed: $e');
   }
 }
+*/
 
 Future<void> _registerWorkManager() async {
   if (kIsWeb) return;

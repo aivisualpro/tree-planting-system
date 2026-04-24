@@ -47,7 +47,7 @@ dependencies:
   permission_handler: ^11.3.1
   
   # i18n
-  intl: ^0.19.0
+  intl: ^0.20.2
   
   # Maps
   flutter_map: ^7.0.0
@@ -70,7 +70,7 @@ dependencies:
   url_launcher: ^6.3.0
   
   # Security Additions
-  http_certificate_pinning: ^1.0.4
+  # http_certificate_pinning: ^1.0.4
   flutter_windowmanager: ^0.2.0
   screen_protector: ^1.1.2
   local_auth: ^2.2.0
@@ -89,7 +89,6 @@ dependencies:
 
   # Performance monitoring
   # §3 – background isolate image decoding
-  image: ^4.2.0
 dev_dependencies:
   flutter_test:
     sdk: flutter
