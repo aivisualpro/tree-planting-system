@@ -6,13 +6,13 @@
 //
 // This generates: <SUPABASE_URL>/storage/v1/render/image/public/visit-media/path/...?width=300&format=webp
 
-import type { ProviderGetImage } from '@nuxt/image'
+declare const process: { env: Record<string, string> }
 
 const SUPABASE_URL = process.env.SUPABASE_URL || ''
 
-export const getImage: ProviderGetImage = (
-  src,
-  { modifiers = {}, baseURL = SUPABASE_URL } = {}
+export const getImage = (
+  src: string,
+  { modifiers = {}, baseURL = SUPABASE_URL }: { modifiers?: Record<string, any>; baseURL?: string } = {}
 ) => {
   const {
     width,

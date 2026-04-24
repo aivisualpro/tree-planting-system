@@ -2,7 +2,6 @@
 // Runs BEFORE serverless functions; keeps auth redirects fast.
 // Deployed to the Edge runtime → no cold start latency.
 
-import { createServerClient } from '@supabase/ssr'
 import { defineEventHandler, sendRedirect, getCookie } from 'h3'
 
 export default defineEventHandler(async (event) => {
