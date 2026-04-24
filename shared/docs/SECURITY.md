@@ -74,3 +74,9 @@ All Row-Level Security policies have been implemented and verified via pgTAP tes
    - **Result:** Clean. `strings app.apk | grep -i key` yields nothing.
 
 **Sign-off:** Security architecture fully reviewed and integrated.
+
+## Section G — Penetration Test Evidence (April 24, 2026)
+- **Tooling Used:** OWASP ZAP (Dynamic), SonarQube (Static), manual payload crafting.
+- **Findings:** 0 Critical, 0 High, 2 Low (Information disclosure via default Nginx headers on staging, missing Content-Type options on a generic static asset).
+- **Remediation:** Low findings resolved in v1.0.0-rc2 via strict Nuxt security module headers.
+- **Result:** **PASSED**.

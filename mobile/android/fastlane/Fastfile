@@ -1,0 +1,18 @@
+default_platform(:android)
+
+platform :android do
+  desc "Deploy to Play Store Internal Testing"
+  lane :beta do
+    gradle(task: "bundle", build_type: "Release")
+    upload_to_play_store(track: "internal")
+  end
+
+  desc "Deploy to Play Store Production with Staged Rollout"
+  lane :release do
+    gradle(task: "bundle", build_type: "Release")
+    upload_to_play_store(
+      track: "production",
+      rollout: "0.1" # 10% rollout
+    )
+  end
+end

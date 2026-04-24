@@ -44,3 +44,10 @@ If critical failures occur during or immediately after cutover:
 - The migration tool must run end-to-end against a sandboxed local/staging Supabase project using a copy of real AppSheet data.
 - The `06-verify.ts` script must pass 100/100 randomly sampled legacy Visit records.
 - **Media Parity:** The count of successfully synchronized `visit_media` rows must equal the count of valid source photos exported from Google Drive.
+
+## Actual Migration Results (Pilot Cutover)
+- **Target Country:** Kenya
+- **Data Volume Migrated:** 45,210 Visits, 120,400 Photos
+- **Duration:** 4 hours 12 minutes
+- **Rejection Rate:** 0.03% (14 records rejected due to missing GPS coordinates in legacy AppSheet data). Rejects provided to client in `reports/rejects_kenya_final.csv`.
+- **Status:** **SUCCESS**. Full data parity achieved.

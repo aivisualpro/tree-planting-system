@@ -1,0 +1,10 @@
+{
+  "framework": "nuxtjs",
+  "buildCommand": "pnpm build",
+  "outputDirectory": ".output/public",
+  "regions": ["iad1", "cdg1"],
+  "github": {
+    "enabled": true,
+    "silent": true
+  }
+}

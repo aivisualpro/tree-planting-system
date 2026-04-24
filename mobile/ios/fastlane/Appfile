@@ -1,0 +1,4 @@
+app_identifier("com.aivisualpro.treeplanting") # Replace with your app identifier
+apple_id("apple_id@example.com") # Replace with your Apple ID
+itc_team_id("YOUR_ITC_TEAM_ID") # App Store Connect Team ID
+team_id("YOUR_TEAM_ID") # Developer Portal Team ID

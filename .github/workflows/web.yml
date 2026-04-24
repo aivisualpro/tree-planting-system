@@ -1,0 +1,97 @@
+name: Web CI/CD
+
+on:
+  push:
+    branches: [ "main" ]
+    paths:
+      - 'web/**'
+      - 'shared/**'
+  pull_request:
+    paths:
+      - 'web/**'
+      - 'shared/**'
+
+jobs:
+  build_and_test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./web
+    steps:
+      - uses: actions/checkout@v4
+      
+      - uses: pnpm/action-setup@v3
+        with:
+          version: 8
+          
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+          cache-dependency-path: 'web/pnpm-lock.yaml'
+          
+      - name: Install dependencies
+        run: pnpm install
+        
+      - name: Lint
+        run: pnpm run lint
+        
+      - name: Typecheck
+        run: pnpm run typecheck
+        
+      - name: Unit Tests
+        run: pnpm run test
+        
+      - name: Build
+        run: pnpm run build
+        
+      - name: Check database types synchronization
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
+      - name: Generate and diff types
+        run: |
+          supabase gen types typescript --project-id ${{ secrets.STAGING_PROJECT_ID }} > ../shared/types/database.ts
+          if [[ -n $(git status --porcelain) ]]; then
+            echo "Types are out of sync! Please update shared/types/database.ts"
+            git diff
+            exit 1
+          fi
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+
+  deploy_preview:
+    if: github.event_name == 'pull_request' || github.ref != 'refs/heads/main'
+    needs: build_and_test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Deploy to Vercel Preview
+        uses: amondnet/vercel-action@v20
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
+          working-directory: ./web
+
+  deploy_production:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: build_and_test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Deploy to Vercel Production
+        uses: amondnet/vercel-action@v20
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
+          working-directory: ./web
+          vercel-args: '--prod'
+      - name: Slack Notification
+        uses: rtCamp/action-slack-notify@v2
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+          SLACK_MESSAGE: 'Web deployed to Vercel production :rocket:'

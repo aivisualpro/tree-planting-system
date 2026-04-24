@@ -1,0 +1,112 @@
+name: Mobile CI/CD
+
+on:
+  pull_request:
+    paths:
+      - 'mobile/**'
+      - 'shared/**'
+  push:
+    tags:
+      - 'mobile-v*'
+
+jobs:
+  test_and_build:
+    if: github.event_name == 'pull_request'
+    runs-on: macos-latest
+    defaults:
+      run:
+        working-directory: ./mobile
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.24.0'
+          channel: 'stable'
+      - name: Install Dependencies
+        run: flutter pub get
+      - name: Analyze
+        run: flutter analyze
+      - name: Test
+        run: flutter test
+      - name: Build Unsigned APK
+        run: flutter build apk --debug --dart-define-from-file=env/local.example.json
+      - name: Build Unsigned IPA
+        run: flutter build ios --no-codesign --dart-define-from-file=env/local.example.json
+
+  deploy_beta:
+    if: startsWith(github.ref, 'refs/tags/mobile-v')
+    runs-on: macos-latest
+    defaults:
+      run:
+        working-directory: ./mobile
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.24.0'
+          channel: 'stable'
+      
+      - name: Install Dependencies
+        run: flutter pub get
+        
+      - name: Write Staging Env
+        run: echo '${{ secrets.MOBILE_STAGING_ENV }}' > env/staging.json
+
+      - name: Build & Deploy iOS to TestFlight
+        run: bundle exec fastlane beta
+        working-directory: ./mobile/ios
+        env:
+          MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
+          APP_STORE_CONNECT_API_KEY_KEY_ID: ${{ secrets.ASC_API_KEY_ID }}
+          APP_STORE_CONNECT_API_KEY_ISSUER_ID: ${{ secrets.ASC_API_KEY_ISSUER_ID }}
+          APP_STORE_CONNECT_API_KEY_KEY: ${{ secrets.ASC_API_KEY_CONTENT }}
+
+      - name: Build & Deploy Android to Play Internal Testing
+        run: bundle exec fastlane beta
+        working-directory: ./mobile/android
+        env:
+          PLAY_STORE_CONFIG_JSON: ${{ secrets.PLAY_STORE_CONFIG_JSON }}
+          ANDROID_KEYSTORE_B64: ${{ secrets.ANDROID_KEYSTORE_B64 }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          ANDROID_STORE_PASSWORD: ${{ secrets.ANDROID_STORE_PASSWORD }}
+
+  deploy_production:
+    if: startsWith(github.ref, 'refs/tags/mobile-v')
+    needs: deploy_beta
+    environment: production
+    runs-on: macos-latest
+    defaults:
+      run:
+        working-directory: ./mobile
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.24.0'
+          channel: 'stable'
+      
+      - name: Install Dependencies
+        run: flutter pub get
+        
+      - name: Write Production Env
+        run: echo '${{ secrets.MOBILE_PRODUCTION_ENV }}' > env/production.json
+
+      - name: Deploy iOS to App Store
+        run: bundle exec fastlane release
+        working-directory: ./mobile/ios
+        env:
+          MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
+          APP_STORE_CONNECT_API_KEY_KEY_ID: ${{ secrets.ASC_API_KEY_ID }}
+          APP_STORE_CONNECT_API_KEY_ISSUER_ID: ${{ secrets.ASC_API_KEY_ISSUER_ID }}
+          APP_STORE_CONNECT_API_KEY_KEY: ${{ secrets.ASC_API_KEY_CONTENT }}
+
+      - name: Deploy Android to Play Production
+        run: bundle exec fastlane release
+        working-directory: ./mobile/android
+        env:
+          PLAY_STORE_CONFIG_JSON: ${{ secrets.PLAY_STORE_CONFIG_JSON }}
+          ANDROID_KEYSTORE_B64: ${{ secrets.ANDROID_KEYSTORE_B64 }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          ANDROID_STORE_PASSWORD: ${{ secrets.ANDROID_STORE_PASSWORD }}
