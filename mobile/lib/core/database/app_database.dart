@@ -22,6 +22,7 @@ part 'app_database.g.dart';
     VisitMedia,
     OutboxEvents,
     SyncMetadata,
+    Translations,
   ],
   daos: [
     OutboxDao,

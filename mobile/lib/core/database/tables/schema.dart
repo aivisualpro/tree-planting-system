@@ -84,3 +84,16 @@ class SyncMetadata extends Table {
   @override
   Set<Column> get primaryKey => {key};
 }
+
+class Translations extends Table {
+  TextColumn get id => text()();
+  TextColumn get entityType => text()();
+  TextColumn get entityId => text()();
+  TextColumn get field => text()();
+  TextColumn get locale => text()();
+  TextColumn get value => text().nullable()();
+  DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
+  
+  @override
+  Set<Column> get primaryKey => {id};
+}

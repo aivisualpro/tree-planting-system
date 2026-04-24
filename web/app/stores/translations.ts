@@ -1,17 +1,41 @@
-import { defineStore } from 'pinia'
+import { defineStore } from 'pinia';
+import { useSupabaseClient } from '#imports';
 
 export const useTranslationsStore = defineStore('translations', {
   state: () => ({
-    translations: {} as Record<string, string>,
-    isLoaded: false,
+    cache: {} as Record<string, string>,
   }),
   actions: {
-    async fetchTranslations() {
-      // Logic to fetch dynamic translations from DB
-      this.isLoaded = true
+    getCacheKey(entityType: string, entityId: string, field: string, locale: string) {
+      return `${entityType}:${entityId}:${field}:${locale}`;
     },
-    getTranslation(key: string, defaultVal: string) {
-      return this.translations[key] || defaultVal
+    async fetchTranslation(entityType: string, entityId: string, field: string, locale: string): Promise<string | null> {
+      const key = this.getCacheKey(entityType, entityId, field, locale);
+      if (this.cache[key] !== undefined) {
+        return this.cache[key];
+      }
+
+      const supabase = useSupabaseClient();
+      const { data, error } = await supabase
+        .from('translations')
+        .select('value')
+        .eq('entity_type', entityType)
+        .eq('entity_id', entityId)
+        .eq('field', field)
+        .eq('locale', locale)
+        .maybeSingle();
+
+      if (!error && data) {
+        this.cache[key] = data.value;
+        return data.value;
+      }
+
+      this.cache[key] = ''; // cache miss
+      return null;
+    },
+    setTranslation(entityType: string, entityId: string, field: string, locale: string, value: string) {
+      const key = this.getCacheKey(entityType, entityId, field, locale);
+      this.cache[key] = value;
     }
   }
-})
+});
