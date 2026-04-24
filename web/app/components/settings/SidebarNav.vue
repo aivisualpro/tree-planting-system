@@ -29,6 +29,14 @@ const sidebarNavItems: Item[] = [
     title: 'Display',
     href: '/settings/display',
   },
+  {
+    title: 'Reports',
+    href: '/settings/reports',
+  },
+  {
+    title: 'Privacy',
+    href: '/settings/privacy',
+  },
 ]
 </script>
 
