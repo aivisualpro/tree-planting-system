@@ -1,0 +1,54 @@
+name: PR Checks
+
+on:
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  backend-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Supabase CLI
+        uses: supabase/setup-cli@v1
+      - name: Start Supabase and run pgTAP
+        run: |
+          cd supabase
+          supabase start
+          supabase test db
+
+  web-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Install dependencies
+        run: |
+          cd web
+          npm ci
+      - name: Run Vitest
+        run: |
+          cd web
+          npm run test:unit -- --coverage
+      - name: Lighthouse CI
+        run: |
+          npm install -g @lhci/cli
+          # Add actual lhci run command here when build is ready
+
+  flutter-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+      - name: Install dependencies
+        run: |
+          cd mobile
+          flutter pub get
+      - name: Run Flutter Tests
+        run: |
+          cd mobile
+          flutter test --coverage

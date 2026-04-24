@@ -1,0 +1,34 @@
+name: Nightly Tests
+
+on:
+  schedule:
+    - cron: '0 0 * * *' # Midnight every day
+  workflow_dispatch:
+
+jobs:
+  load-chaos-e2e:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup k6
+        run: |
+          sudo gpg -k
+          sudo gpg --no-default-keyring --keyring /usr/share/keyrings/k6-archive-keyring.gpg --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys C5AD17C747E3415A3642D57D77C6C491D6AC1D69
+          echo "deb [signed-by=/usr/share/keyrings/k6-archive-keyring.gpg] https://dl.k6.io/deb stable main" | sudo tee /etc/apt/sources.list.d/k6.list
+          sudo apt-get update
+          sudo apt-get install k6
+      - name: Run k6 load test
+        run: |
+          k6 run shared/scripts/perf/k6_dashboard.js
+
+  flutter-integration:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+      - name: Setup Firebase Test Lab
+        run: |
+          # Setup gcloud auth and run patrol/integration tests on Test Lab
+          echo "Placeholder for Firebase Test Lab run"

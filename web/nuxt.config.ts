@@ -86,7 +86,7 @@ export default defineNuxtConfig({
     '@nuxt/fonts',
     '@nuxtjs/supabase',
     '@nuxtjs/i18n',
-    '@nuxtjs/security',
+    'nuxt-security',
   ],
 
   supabase: {
