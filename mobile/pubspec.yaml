@@ -67,6 +67,10 @@ dependencies:
   screen_protector: ^1.1.2
   local_auth: ^2.2.0
   flutter_jailbreak_detection: ^1.2.0
+  
+  # Firebase Notifications
+  firebase_core: ^2.27.0
+  firebase_messaging: ^14.7.19
 dev_dependencies:
   flutter_test:
     sdk: flutter

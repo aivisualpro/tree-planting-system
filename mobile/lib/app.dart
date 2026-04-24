@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 // import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'router/app_router.dart';
 import 'core/theme/app_theme.dart';
+import 'core/notifications/notification_service.dart';
 
 import 'core/sync/sync_provider.dart';
 
@@ -18,6 +19,11 @@ class _AppState extends ConsumerState<App> with WidgetsBindingObserver {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final router = ref.read(appRouterProvider);
+      ref.read(notificationServiceProvider).setupInteractedMessage(router);
+    });
   }
 
   @override

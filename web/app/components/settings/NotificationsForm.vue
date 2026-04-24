@@ -1,196 +1,183 @@
 <script setup lang="ts">
 import { toTypedSchema } from '@vee-validate/zod'
 import { useForm } from 'vee-validate'
-import { h } from 'vue'
+import { h, onMounted, ref } from 'vue'
 import { toast } from 'vue-sonner'
 import * as z from 'zod'
 
+const supabase = useSupabaseClient()
+const user = useSupabaseUser()
+const isLoading = ref(true)
+
 const notificationsFormSchema = toTypedSchema(z.object({
-  type: z.enum(['all', 'mentions', 'none'], {
-    required_error: 'You need to select a notification type.',
-  }),
-  mobile: z.boolean().default(false).optional(),
-  communication_emails: z.boolean().default(false).optional(),
-  social_emails: z.boolean().default(false).optional(),
-  marketing_emails: z.boolean().default(false).optional(),
-  security_emails: z.boolean(),
+  push_enabled: z.boolean().default(true),
+  email_enabled: z.boolean().default(true),
+  whatsapp_enabled: z.boolean().default(false),
+  quiet_hours_start: z.string().optional(),
+  quiet_hours_end: z.string().optional(),
+  timezone: z.string().default('UTC'),
 }))
 
-const { handleSubmit } = useForm({
+const { handleSubmit, setValues } = useForm({
   validationSchema: notificationsFormSchema,
   initialValues: {
-    communication_emails: false,
-    marketing_emails: false,
-    social_emails: true,
-    security_emails: true,
+    push_enabled: true,
+    email_enabled: true,
+    whatsapp_enabled: false,
+    quiet_hours_start: '',
+    quiet_hours_end: '',
+    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC',
   },
 })
 
-const onSubmit = handleSubmit((values) => {
-  toast('You submitted the following values:', {
-    description: h('pre', { class: 'mt-2 w-[340px] rounded-md bg-slate-950 p-4' }, h('code', { class: 'text-white' }, JSON.stringify(values, null, 2))),
-  })
+onMounted(async () => {
+  if (!user.value) return
+  
+  try {
+    const { data, error } = await supabase
+      .from('notification_preferences')
+      .select('*')
+      .eq('user_id', user.value.id)
+      .single()
+      
+    if (error && error.code !== 'PGRST116') throw error
+    
+    if (data) {
+      setValues({
+        push_enabled: data.push_enabled,
+        email_enabled: data.email_enabled,
+        whatsapp_enabled: data.whatsapp_enabled,
+        quiet_hours_start: data.quiet_hours_start || '',
+        quiet_hours_end: data.quiet_hours_end || '',
+        timezone: data.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC',
+      })
+    }
+  } catch (e: any) {
+    toast.error('Failed to load preferences', { description: e.message })
+  } finally {
+    isLoading.value = false
+  }
+})
+
+const onSubmit = handleSubmit(async (values) => {
+  if (!user.value) return
+  
+  try {
+    const { error } = await supabase
+      .from('notification_preferences')
+      .upsert({
+        user_id: user.value.id,
+        push_enabled: values.push_enabled,
+        email_enabled: values.email_enabled,
+        whatsapp_enabled: values.whatsapp_enabled,
+        quiet_hours_start: values.quiet_hours_start || null,
+        quiet_hours_end: values.quiet_hours_end || null,
+        timezone: values.timezone,
+        updated_at: new Date().toISOString()
+      })
+      
+    if (error) throw error
+    
+    toast.success('Preferences updated successfully.')
+  } catch (e: any) {
+    toast.error('Failed to update preferences', { description: e.message })
+  }
 })
 </script>
 
 <template>
-  <div>
-    <h3 class="text-lg font-medium">
-      Notifications
-    </h3>
-    <p class="text-sm text-muted-foreground">
-      Configure how you receive notifications.
-    </p>
+  <div v-if="isLoading" class="flex items-center justify-center p-8">
+    <Icon name="lucide:loader-2" class="w-6 h-6 animate-spin text-muted-foreground" />
   </div>
-  <Separator />
-  <form class="space-y-8" @submit="onSubmit">
-    <FormField v-slot="{ componentField }" type="radio" name="type">
-      <FormItem class="space-y-3">
-        <FormLabel>Notify me about...</FormLabel>
-        <FormControl>
-          <RadioGroup
-            class="flex flex-col space-y-1"
-            v-bind="componentField"
-          >
-            <FormItem class="flex items-center space-x-3 space-y-0">
-              <FormControl>
-                <RadioGroupItem value="all" />
-              </FormControl>
-              <FormLabel class="font-normal">
-                All new messages
-              </FormLabel>
-            </FormItem>
-            <FormItem class="flex items-center space-x-3 space-y-0">
-              <FormControl>
-                <RadioGroupItem value="mentions" />
-              </FormControl>
-              <FormLabel class="font-normal">
-                Direct messages and mentions
-              </FormLabel>
-            </FormItem>
-            <FormItem class="flex items-center space-x-3 space-y-0">
-              <FormControl>
-                <RadioGroupItem value="none" />
-              </FormControl>
-              <FormLabel class="font-normal">
-                Nothing
-              </FormLabel>
-            </FormItem>
-          </RadioGroup>
-        </FormControl>
-        <FormMessage />
-      </FormItem>
-    </FormField>
-
+  <div v-else>
     <div>
-      <h3 class="mb-4 text-lg font-medium">
-        Email Notifications
+      <h3 class="text-lg font-medium">
+        Notifications
       </h3>
-      <div class="space-y-4">
-        <FormField v-slot="{ handleChange, value }" type="checkbox" name="communication_emails">
-          <FormItem class="flex flex-row items-center justify-between border rounded-lg p-4">
-            <div class="space-y-0.5">
-              <FormLabel class="text-base">
-                Communication emails
-              </FormLabel>
-              <FormDescription>
-                Receive emails about your account activity.
-              </FormDescription>
-            </div>
-            <FormControl>
-              <Switch
-                :checked="value"
-                @update:checked="handleChange"
-              />
-            </FormControl>
-          </FormItem>
-        </FormField>
-
-        <FormField v-slot="{ handleChange, value }" type="checkbox" name="marketing_emails">
-          <FormItem class="flex flex-row items-center justify-between border rounded-lg p-4">
-            <div class="space-y-0.5">
-              <FormLabel class="text-base">
-                Marketing emails
-              </FormLabel>
-              <FormDescription>
-                Receive emails about new products, features, and more.
-              </FormDescription>
-            </div>
-            <FormControl>
-              <Switch
-                :checked="value"
-                @update:checked="handleChange"
-              />
-            </FormControl>
-          </FormItem>
-        </FormField>
-
-        <FormField v-slot="{ handleChange, value }" type="checkbox" name="social_emails">
-          <FormItem class="flex flex-row items-center justify-between border rounded-lg p-4">
-            <div class="space-y-0.5">
-              <FormLabel class="text-base">
-                Social emails
-              </FormLabel>
-              <FormDescription>
-                Receive emails for friend requests, follows, and more.
-              </FormDescription>
-            </div>
-            <FormControl>
-              <Switch
-                :checked="value"
-                @update:checked="handleChange"
-              />
-            </FormControl>
-          </FormItem>
-        </FormField>
-
-        <FormField v-slot="{ handleChange, value }" type="checkbox" name="security_emails">
-          <FormItem class="flex flex-row items-center justify-between border rounded-lg p-4">
-            <div class="space-y-0.5">
-              <FormLabel class="text-base">
-                Security emails
-              </FormLabel>
-              <FormDescription>
-                Receive emails about your account activity and security.
-              </FormDescription>
-            </div>
-            <FormControl>
-              <Switch
-                :checked="value"
-                @update:checked="handleChange"
-              />
-            </FormControl>
-          </FormItem>
-        </FormField>
-      </div>
+      <p class="text-sm text-muted-foreground">
+        Configure how you receive alerts and updates.
+      </p>
     </div>
+    <Separator class="my-6" />
+    <form class="space-y-8" @submit="onSubmit">
+      <div>
+        <h3 class="mb-4 text-lg font-medium">
+          Delivery Channels
+        </h3>
+        <div class="space-y-4">
+          <FormField v-slot="{ handleChange, value }" type="checkbox" name="push_enabled">
+            <FormItem class="flex flex-row items-center justify-between border rounded-lg p-4">
+              <div class="space-y-0.5">
+                <FormLabel class="text-base">Push Notifications</FormLabel>
+                <FormDescription>Receive push alerts on your mobile and web devices.</FormDescription>
+              </div>
+              <FormControl>
+                <Switch :checked="value" @update:checked="handleChange" />
+              </FormControl>
+            </FormItem>
+          </FormField>
 
-    <FormField v-slot="{ handleChange, value }" type="checkbox" name="mobile">
-      <FormItem class="flex flex-row items-start space-x-3 space-y-0">
-        <FormControl>
-          <Checkbox
-            :checked="value"
-            @update:checked="handleChange"
-          />
-        </FormControl>
-        <div class="leading-none space-y-1">
-          <FormLabel>
-            Use different settings for my mobile devices
-          </FormLabel>
-          <FormDescription>
-            You can manage your mobile notifications in the
-            <a href="/examples/forms">
-              mobile settings
-            </a> page.
-          </FormDescription>
+          <FormField v-slot="{ handleChange, value }" type="checkbox" name="email_enabled">
+            <FormItem class="flex flex-row items-center justify-between border rounded-lg p-4">
+              <div class="space-y-0.5">
+                <FormLabel class="text-base">Email Notifications</FormLabel>
+                <FormDescription>Receive updates via email.</FormDescription>
+              </div>
+              <FormControl>
+                <Switch :checked="value" @update:checked="handleChange" />
+              </FormControl>
+            </FormItem>
+          </FormField>
+
+          <FormField v-slot="{ handleChange, value }" type="checkbox" name="whatsapp_enabled">
+            <FormItem class="flex flex-row items-center justify-between border rounded-lg p-4">
+              <div class="space-y-0.5">
+                <FormLabel class="text-base">WhatsApp Notifications</FormLabel>
+                <FormDescription>Receive critical alerts via WhatsApp.</FormDescription>
+              </div>
+              <FormControl>
+                <Switch :checked="value" @update:checked="handleChange" />
+              </FormControl>
+            </FormItem>
+          </FormField>
         </div>
-      </FormItem>
-    </FormField>
+      </div>
 
-    <div class="flex justify-start">
-      <Button type="submit">
-        Update notifications
-      </Button>
-    </div>
-  </form>
+      <div>
+        <h3 class="mb-4 text-lg font-medium">
+          Quiet Hours
+        </h3>
+        <div class="grid gap-4 md:grid-cols-2">
+          <FormField v-slot="{ componentField }" name="quiet_hours_start">
+            <FormItem>
+              <FormLabel>Start Time</FormLabel>
+              <FormControl>
+                <Input type="time" v-bind="componentField" />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          </FormField>
+
+          <FormField v-slot="{ componentField }" name="quiet_hours_end">
+            <FormItem>
+              <FormLabel>End Time</FormLabel>
+              <FormControl>
+                <Input type="time" v-bind="componentField" />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          </FormField>
+        </div>
+        <p class="mt-2 text-sm text-muted-foreground">
+          Notifications will be deferred during this window in your local time zone.
+        </p>
+      </div>
+
+      <div class="flex justify-start">
+        <Button type="submit">
+          Save preferences
+        </Button>
+      </div>
+    </form>
+  </div>
 </template>

@@ -4,7 +4,9 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:workmanager/workmanager.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http_certificate_pinning/http_certificate_pinning.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'core/config/env.dart';
+import 'core/notifications/notification_service.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'core/sync/sync_provider.dart';
@@ -38,6 +40,7 @@ Future<void> bootstrap() async {
   );
 
   if (!kIsWeb) {
+    await NotificationService().initialize();
     try {
       await HttpCertificatePinning.check(
         serverURL: Env.supabaseUrl,

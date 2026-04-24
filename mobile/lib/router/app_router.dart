@@ -10,6 +10,8 @@ import '../features/visits/screens/create_visit_screen.dart';
 import '../features/visits/screens/visit_detail_screen.dart';
 import '../features/visits/screens/drafts_screen.dart';
 import '../features/sync/screens/sync_log_screen.dart';
+import '../features/settings/settings_screen.dart';
+import '../features/settings/notifications_screen.dart';
 part 'app_router.g.dart';
 
 @riverpod
@@ -54,7 +56,13 @@ GoRouter appRouter(AppRouterRef ref) {
       ),
       GoRoute(
         path: '/settings',
-        builder: (context, state) => const Scaffold(body: Center(child: Text('Settings'))),
+        builder: (context, state) => const SettingsScreen(),
+        routes: [
+          GoRoute(
+            path: 'notifications',
+            builder: (context, state) => const NotificationsScreen(),
+          ),
+        ],
       ),
     ],
     redirect: (context, state) {
