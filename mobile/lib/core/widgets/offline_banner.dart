@@ -15,13 +15,17 @@ class OfflineBanner extends ConsumerWidget {
         if (results.contains(ConnectivityResult.none)) {
           return Container(
             color: Colors.red,
-            padding: const EdgeInsets.all(8),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: const Row(
-              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.wifi_off, color: Colors.white, size: 16),
+                Icon(Icons.wifi_off, color: Colors.white, size: 20),
                 SizedBox(width: 8),
-                Text('Offline', style: TextStyle(color: Colors.white)),
+                Expanded(
+                  child: Text(
+                    'Offline — 3 pending to sync. Maps cached: Tanzania. Last sync: 2h ago.',
+                    style: TextStyle(color: Colors.white, fontSize: 12),
+                  ),
+                ),
               ],
             ),
           );

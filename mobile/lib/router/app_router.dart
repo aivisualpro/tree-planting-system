@@ -10,8 +10,12 @@ import '../features/visits/screens/create_visit_screen.dart';
 import '../features/visits/screens/visit_detail_screen.dart';
 import '../features/visits/screens/drafts_screen.dart';
 import '../features/sync/screens/sync_log_screen.dart';
+import '../features/sync/screens/preload_data_screen.dart';
 import '../features/settings/settings_screen.dart';
 import '../features/settings/notifications_screen.dart';
+import '../features/settings/offline_maps_screen.dart';
+import '../features/settings/storage_screen.dart';
+import '../features/settings/help_screen.dart';
 part 'app_router.g.dart';
 
 @riverpod
@@ -26,6 +30,10 @@ GoRouter appRouter(AppRouterRef ref) {
       GoRoute(
         path: '/login',
         builder: (context, state) => const LoginScreen(),
+      ),
+      GoRoute(
+        path: '/preload',
+        builder: (context, state) => const PreloadDataScreen(),
       ),
       GoRoute(
         path: '/visits',
@@ -61,6 +69,18 @@ GoRouter appRouter(AppRouterRef ref) {
           GoRoute(
             path: 'notifications',
             builder: (context, state) => const NotificationsScreen(),
+          ),
+          GoRoute(
+            path: 'offline-maps',
+            builder: (context, state) => const OfflineMapsScreen(),
+          ),
+          GoRoute(
+            path: 'storage',
+            builder: (context, state) => const StorageScreen(),
+          ),
+          GoRoute(
+            path: 'help',
+            builder: (context, state) => const HelpScreen(),
           ),
         ],
       ),

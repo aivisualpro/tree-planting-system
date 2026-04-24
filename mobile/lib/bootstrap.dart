@@ -5,6 +5,7 @@ import 'package:workmanager/workmanager.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http_certificate_pinning/http_certificate_pinning.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart';
 import 'core/config/env.dart';
 import 'core/notifications/notification_service.dart';
 
@@ -40,6 +41,9 @@ Future<void> bootstrap() async {
   );
 
   if (!kIsWeb) {
+    await FMTCObjectBoxBackend().initialise();
+    await const FMTCStore('offline_maps').manage.create();
+
     await NotificationService().initialize();
     try {
       await HttpCertificatePinning.check(

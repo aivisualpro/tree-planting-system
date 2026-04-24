@@ -6,6 +6,7 @@ import 'core/theme/app_theme.dart';
 import 'core/notifications/notification_service.dart';
 
 import 'core/sync/sync_provider.dart';
+import 'features/settings/training_mode_provider.dart';
 
 class App extends ConsumerStatefulWidget {
   const App({super.key});
@@ -42,6 +43,7 @@ class _AppState extends ConsumerState<App> with WidgetsBindingObserver {
   @override
   Widget build(BuildContext context) {
     final router = ref.watch(appRouterProvider);
+    final isTrainingMode = ref.watch(trainingModeProvider);
     // Placeholder until l10n is generated
     // final locale = ref.watch(localeProvider); 
 
@@ -51,6 +53,33 @@ class _AppState extends ConsumerState<App> with WidgetsBindingObserver {
       darkTheme: AppTheme.darkTheme,
       themeMode: ThemeMode.system,
       routerConfig: router,
+      builder: (context, child) {
+        if (!isTrainingMode) return child!;
+        return Directionality(
+          textDirection: TextDirection.ltr,
+          child: Column(
+            children: [
+              Container(
+                height: 40,
+                color: Colors.orange,
+                width: double.infinity,
+                alignment: Alignment.bottomCenter,
+                padding: const EdgeInsets.only(bottom: 4),
+                child: const Text(
+                  'TRAINING MODE',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 12,
+                    decoration: TextDecoration.none,
+                  ),
+                ),
+              ),
+              Expanded(child: child!),
+            ],
+          ),
+        );
+      },
       // localizationsDelegates: AppLocalizations.localizationsDelegates,
       // supportedLocales: AppLocalizations.supportedLocales,
       // locale: locale,

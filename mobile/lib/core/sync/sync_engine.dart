@@ -12,6 +12,7 @@ class SyncEngine {
   final OutboxProcessor outboxProcessor;
   final MediaUploader mediaUploader;
   final DeltaPuller deltaPuller;
+  final bool isTrainingMode;
 
   final _stateController = StreamController<SyncStatus>.broadcast();
   Stream<SyncStatus> get status => _stateController.stream;
@@ -22,6 +23,7 @@ class SyncEngine {
     required this.outboxProcessor,
     required this.mediaUploader,
     required this.deltaPuller,
+    this.isTrainingMode = false,
   }) {
     _stateController.add(const SyncStatus(state: SyncState.idle));
   }
@@ -43,6 +45,8 @@ class SyncEngine {
   }
 
   Future<void> runSync() async {
+    if (isTrainingMode) return;
+    
     await _mutex.protect(() async {
       try {
         final connectivityResult = await connectivity.checkConnectivity();

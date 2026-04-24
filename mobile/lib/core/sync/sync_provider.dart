@@ -10,9 +10,19 @@ import 'retry_policy.dart';
 
 part 'sync_provider.g.dart';
 
+import '../../features/settings/training_mode_provider.dart';
+
 @Riverpod(keepAlive: true)
 AppDatabase appDatabase(AppDatabaseRef ref) {
-  return AppDatabase();
+  final isTrainingMode = ref.watch(trainingModeProvider);
+  final dbName = isTrainingMode ? 'demo.db' : 'db.sqlite';
+  final db = AppDatabase(dbName: dbName);
+  
+  ref.onDispose(() {
+    db.close();
+  });
+  
+  return db;
 }
 
 @Riverpod(keepAlive: true)
@@ -45,5 +55,6 @@ SyncEngine syncEngine(SyncEngineRef ref) {
     outboxProcessor: outboxProcessor,
     mediaUploader: mediaUploader,
     deltaPuller: deltaPuller,
+    isTrainingMode: ref.watch(trainingModeProvider),
   );
 }

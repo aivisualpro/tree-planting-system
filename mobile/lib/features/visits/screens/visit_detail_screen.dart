@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:latlong2/latlong.dart';
+import '../../core/widgets/offline_map_widget.dart';
 
 class VisitDetailScreen extends ConsumerWidget {
   final String visitId;
@@ -33,7 +35,17 @@ class VisitDetailScreen extends ConsumerWidget {
             const SizedBox(height: 16),
             const Text('GPS Location', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
             const SizedBox(height: 8),
-            Container(height: 200, color: Colors.grey[300], child: const Center(child: Text('Map Preview'))),
+            SizedBox(
+              height: 200,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: const OfflineMapWidget(
+                  initialCenter: LatLng(-6.173, 35.741), // Example coordinates for Tanzania
+                  initialZoom: 10.0,
+                  interactive: false,
+                ),
+              ),
+            ),
             const SizedBox(height: 16),
             const Text('Signature', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
             const SizedBox(height: 8),
